@@ -15,6 +15,8 @@ namespace Example
 {
     public partial class Form1 : Form
     {
+        Image<Bgr, byte> _imgInput;
+
         public Form1()
         {
             InitializeComponent();
@@ -23,18 +25,7 @@ namespace Example
         VideoCapture capture;
         Boolean Pause = false;
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                capture = new VideoCapture(ofd.FileName);
-                Mat m = new Mat();
-                capture.Read(m);
-                pictureBox1.Image = m.Bitmap;
-            }
-        }
+       
 
         /*private void rgbToHsv(Bitmap bitmap)
         {
@@ -68,9 +59,9 @@ namespace Example
 
         public bool convertToGray(Bitmap b)
         {
-            for(int i = 0; i < b.Width; i++)
+            for (int i = 0; i < b.Width; i++)
             {
-                for(int j = 0; j < b.Height; j++)
+                for (int j = 0; j < b.Height; j++)
                 {
                     Color c1 = b.GetPixel(i, j);
                     int r1 = c1.R;
@@ -78,10 +69,10 @@ namespace Example
                     int b1 = c1.B;
                     int a1 = c1.A;
                     int gray = (byte)(.299 * r1 + .587 * g1 + .114 * b1);
-                   /* r1 = gray;
-                    g1 = gray;
-                    b1 = gray;
-                    b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));*/
+                    /* r1 = gray;
+                     g1 = gray;
+                     b1 = gray;
+                     b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));*/
 
 
                     float hue = c1.GetHue();
@@ -89,7 +80,7 @@ namespace Example
                     float val = c1.GetBrightness();
                     //r1 = gray;
                     //g1 = gray;
-                   // b1 = gray;
+                    // b1 = gray;
                     //b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));
                     if (0.0 <= hue && hue <= 50.0 && 0.23 <= sat && sat <= 0.68 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
                     {
@@ -123,7 +114,7 @@ namespace Example
                     capture.Read(m);
                     if (!m.IsEmpty)
                     {
-                        pictureBox1.Image = m.Bitmap;
+                        //pictureBox1.Image = m.Bitmap;
                         //rgbToHsv(m.Bitmap);
                         convertToGray(m.Bitmap);
                         pictureBox2.Image = m.Bitmap;
@@ -142,6 +133,60 @@ namespace Example
             }
         }
 
-        
+        private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Pause = !Pause;
+        }
+
+
+
+       
+
+
+       
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to close window?", "System Message", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                this.Close();
+            }
+
+        }
+
+        private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                capture = new VideoCapture(ofd.FileName);
+                Mat m = new Mat();
+                capture.Read(m);
+                pictureBox1.Image = m.Bitmap;
+            }
+        }
+
+        private void openImageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog of = new OpenFileDialog();
+            if (of.ShowDialog() == DialogResult.OK)
+            {
+                _imgInput = new Image<Bgr, byte>(of.FileName);
+                imageBox1.Image = _imgInput;
+            }
+        }
+
+        private void cannyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_imgInput == null)
+            {
+                return;
+            }
+
+            Image<Gray, byte> _imgCanny = new Image<Gray, byte>(_imgInput.Width, _imgInput.Height);
+            _imgCanny = _imgInput.Canny(50, 20);
+            imageBox1.Image = _imgCanny;
+        }
     }
 }
