@@ -123,7 +123,7 @@ namespace Example
                     capture.Read(m);
                     if (!m.IsEmpty)
                     {
-                        pictureBox1.Image = m.Bitmap;
+                        //pictureBox1.Image = m.Bitmap;
                         //rgbToHsv(m.Bitmap);
                         convertToGray(m.Bitmap);
                         pictureBox2.Image = m.Bitmap;
@@ -142,6 +142,9 @@ namespace Example
             }
         }
 
-        
+        private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Pause = ! Pause;
+        }
     }
 }
