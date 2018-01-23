@@ -82,9 +82,9 @@ namespace Example
                     //g1 = gray;
                     // b1 = gray;
                     //b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));
-                    if (0.0 <= hue && hue <= 50.0 && 0.23 <= sat && sat <= 0.68 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
+                    if (0.0 <= hue && hue <= 50.0 && 0.1 <= sat && sat <= 0.68 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
                     {
-                        b.SetPixel(i, j, Color.FromArgb(255, 255, 255));
+                        b.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
                     }
                     else
                     {
@@ -117,6 +117,16 @@ namespace Example
                         //pictureBox1.Image = m.Bitmap;
                         //rgbToHsv(m.Bitmap);
                         convertToGray(m.Bitmap);
+
+                        Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
+
+                          Image <Gray, byte> _imgCanny = new Image<Gray, byte>(m.Width, m.Height);
+                        _imgCanny = imgeOrigenal.Canny(150, 100);
+                        
+
+
+
+                        imageBox1.Image = _imgCanny;
                         pictureBox2.Image = m.Bitmap;
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
@@ -139,11 +149,6 @@ namespace Example
         }
 
 
-
-       
-
-
-       
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -185,8 +190,36 @@ namespace Example
             }
 
             Image<Gray, byte> _imgCanny = new Image<Gray, byte>(_imgInput.Width, _imgInput.Height);
-            _imgCanny = _imgInput.Canny(50, 20);
+            _imgCanny = _imgInput.Canny(150, 100);
             imageBox1.Image = _imgCanny;
+        }
+
+        private void skinDetectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_imgInput == null)
+            {
+                return;
+            }
+            convertToGray(_imgInput.Bitmap);
+            imageBox1.Image = _imgInput;
+        }
+
+        private void sobelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_imgInput == null)
+            {
+                return;
+            }
+
+            IOutputArray magnitude;
+            IOutputArray angle;
+
+            Image<Bgr, float> _imgSobelx = new Image<Bgr, float>(_imgInput.Width, _imgInput.Height);
+            Image<Bgr, float> _imgSobely = new Image<Bgr, float>(_imgInput.Width, _imgInput.Height);
+            _imgSobelx = _imgInput.Sobel(1, 0, 3);
+            _imgSobely = _imgInput.Sobel(0, 1, 3);
+            CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
+            imageBox1.Image = _imgSobelx;
         }
     }
 }
