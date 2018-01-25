@@ -72,9 +72,9 @@ namespace Example
                     float hue = c1.GetHue();
                     float sat = c1.GetSaturation();
                     float val = c1.GetBrightness();
-                    if (0.0 <= hue && hue <= 50.0 && 0.1 <= sat && sat <= 0.68 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
+                    if (0.0 <= hue && hue <= 50.0 && 0.1 <= sat && sat <= 0.95 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
                     {
-                        b.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
+                        b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));
                     }
                     else
                     {
@@ -102,10 +102,23 @@ namespace Example
                     if (!m.IsEmpty)
                     {
                         convertToGray(m.Bitmap);
-                        Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
+                        /*Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
                         Image <Gray, byte> _imgCanny = new Image<Gray, byte>(m.Width, m.Height);
                         _imgCanny = imgeOrigenal.Canny(150, 100);
-                        imageBox1.Image = _imgCanny;
+                        imageBox1.Image = _imgCanny;*/
+                        Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
+                        Image<Gray, float> _imgSobelx = new Image<Gray, float>(m.Width, m.Height);
+                        Image<Gray, float> _imgSobely = new Image<Gray, float>(m.Width, m.Height);
+                        _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
+                        _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
+                        Image<Gray, float> magnitude = new Image<Gray, float>(m.Width, m.Height);
+                        Image<Gray, float> angle = new Image<Gray, float>(m.Width, m.Height);
+                        CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
+                        imageBox1.Image = magnitude;
+                        imageBox1.Refresh();
+                        histogramBox1.ClearHistogram();
+                        histogramBox1.GenerateHistograms(magnitude, 36);
+                        histogramBox1.Refresh();
                         pictureBox2.Image = m.Bitmap;
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
@@ -187,15 +200,110 @@ namespace Example
             }
 
             //IOutputArray magnitude;
-            IOutputArray angle;
-
-            Image<Bgr, float> _imgSobelx = new Image<Bgr, float>(_imgInput.Width, _imgInput.Height);
-            Image<Bgr, float> _imgSobely = new Image<Bgr, float>(_imgInput.Width, _imgInput.Height);
-            _imgSobelx = _imgInput.Sobel(1, 0, 3);
-            _imgSobely = _imgInput.Sobel(0, 1, 3);
-           // CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
-            imageBox1.Image = _imgSobelx;
+            // IOutputArray angle;
+            Image<Gray, byte> imgeOrigenal = _imgInput.Convert<Gray, byte>();
+            Image<Gray, float> _imgSobelx = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
+            Image<Gray, float> _imgSobely = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
+            _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
+            _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
+            Image<Gray, float> magnitude = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
+            Image<Gray, float> angle = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
+            CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
+            imageBox1.Image = magnitude;
+            imageBox1.Refresh();
+            histogramBox1.ClearHistogram();
+            histogramBox1.GenerateHistograms(magnitude, 36);
+            histogramBox1.Refresh();
         }
 
+        private void histogramToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(_imgInput==null)
+            {
+                MessageBox.Show("Please Select an image !");
+                return;
+            }
+            histogramBox1.ClearHistogram();
+            histogramBox1.GenerateHistograms(_imgInput, 36);
+            histogramBox1.Refresh();
+        }
     }
 }
+
+
+/*using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using Emgu.CV.CvEnum;
+
+namespace Example
+{
+    public partial class Form1 : Form
+    {
+        Image<Bgr, byte> _imgInput;
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog of = new OpenFileDialog();
+            if (of.ShowDialog() == DialogResult.OK)
+            {
+                _imgInput = new Image<Bgr, byte>(of.FileName);
+                imageBox1.Image = _imgInput;
+            }
+        }
+    }
+
+
+    public mat imgradient(mat grayscaleimage)     
+    {         
+        mat grad_x=new mat();         
+        mat grad_y = new mat();         
+        mat abs_grad_x=new mat();         
+        mat abs_grad_y=new mat();                     
+        mat gradientimag = new mat(grayscaleimage.rows(),grayscaleimage.cols(),cvtype.cv_8uc1);           
+        imgproc.sobel(grayscaleimage, grad_x, cvtype.cv_16s, 1, 0,3,1,0,imgproc.border_default );          
+        core.convertscaleabs( grad_x, abs_grad_x );                       
+        imgproc.sobel( grayscaleimage, grad_y, cvtype.cv_16s, 0, 1, 3, 1,0,imgproc.border_default );          
+        core.convertscaleabs( grad_y, abs_grad_y );                          
+        double[] buff_grad = new double[1];          
+        for(int = 0; < abs_grad_y.cols(); i++)             
+        {                 
+            for(int j =0 ; j<abs_grad_y.rows() ; j++)                 
+            {                     
+                double[] buff_x = abs_grad_x.get(j, i);                     
+                double[] buff_y = abs_grad_y.get(j, i);                     
+                double x =  buff_x[0];                     
+                double y =  buff_y[0];                     
+                double ans=0;                     
+                try                     
+                {                          
+                    ans = math.sqrt(math.pow(x,2)+math.pow(y,2));                     
+                }catch(nullpointerexception e)                     
+                {                         
+                    ans = 0;                      
+                }                     
+                buff_grad[0] =  ans;                                             
+                gradientimag.put(j, i, buff_grad);                    
+            }             
+        }                    
+        return gradientimag;     
+    }
+
+
+
+
+
+
+}*/

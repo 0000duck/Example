@@ -43,6 +43,8 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
+            this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.histogramBox1 = new Emgu.CV.UI.HistogramBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -58,10 +60,11 @@
             this.exitToolStripMenuItem,
             this.cannyToolStripMenuItem,
             this.skinDetectionToolStripMenuItem,
-            this.sobelToolStripMenuItem});
+            this.sobelToolStripMenuItem,
+            this.histogramToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1164, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1370, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -77,14 +80,14 @@
             // openVideoToolStripMenuItem
             // 
             this.openVideoToolStripMenuItem.Name = "openVideoToolStripMenuItem";
-            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.openVideoToolStripMenuItem.Text = "OpenVideo";
             this.openVideoToolStripMenuItem.Click += new System.EventHandler(this.openVideoToolStripMenuItem_Click);
             // 
             // openImageToolStripMenuItem
             // 
             this.openImageToolStripMenuItem.Name = "openImageToolStripMenuItem";
-            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.openImageToolStripMenuItem.Text = "OpenImage";
             this.openImageToolStripMenuItem.Click += new System.EventHandler(this.openImageToolStripMenuItem_Click);
             // 
@@ -134,16 +137,16 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(15, 56);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(280, 263);
+            this.pictureBox1.Size = new System.Drawing.Size(186, 182);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(338, 56);
+            this.pictureBox2.Location = new System.Drawing.Point(207, 54);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(276, 263);
+            this.pictureBox2.Size = new System.Drawing.Size(188, 183);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 2;
             this.pictureBox2.TabStop = false;
@@ -159,18 +162,33 @@
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(673, 59);
+            this.imageBox1.Location = new System.Drawing.Point(401, 54);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(260, 259);
+            this.imageBox1.Size = new System.Drawing.Size(195, 183);
             this.imageBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
+            // 
+            // histogramToolStripMenuItem
+            // 
+            this.histogramToolStripMenuItem.Name = "histogramToolStripMenuItem";
+            this.histogramToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.histogramToolStripMenuItem.Text = "Histogram";
+            this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
+            // 
+            // histogramBox1
+            // 
+            this.histogramBox1.Location = new System.Drawing.Point(602, 54);
+            this.histogramBox1.Name = "histogramBox1";
+            this.histogramBox1.Size = new System.Drawing.Size(751, 500);
+            this.histogramBox1.TabIndex = 5;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1164, 535);
+            this.ClientSize = new System.Drawing.Size(1370, 609);
+            this.Controls.Add(this.histogramBox1);
             this.Controls.Add(this.imageBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox2);
@@ -205,6 +223,8 @@
         private System.Windows.Forms.ToolStripMenuItem cannyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem skinDetectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sobelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem histogramToolStripMenuItem;
+        private Emgu.CV.UI.HistogramBox histogramBox1;
     }
 }
 
