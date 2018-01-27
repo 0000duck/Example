@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
+//using Emgu.CV.
 
 namespace Example
 {
@@ -214,6 +215,8 @@ namespace Example
             histogramBox1.ClearHistogram();
             histogramBox1.GenerateHistograms(magnitude, 36);
             histogramBox1.Refresh();
+            HOGDescriptor h1 = new HOGDescriptor();
+            
         }
 
         private void histogramToolStripMenuItem_Click(object sender, EventArgs e)
@@ -226,6 +229,11 @@ namespace Example
             histogramBox1.ClearHistogram();
             histogramBox1.GenerateHistograms(_imgInput, 36);
             histogramBox1.Refresh();
+        }
+
+        private void hOGDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //HOGDescriptor(magnitude);
         }
     }
 }

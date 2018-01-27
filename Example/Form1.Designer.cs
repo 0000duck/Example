@@ -39,12 +39,13 @@
             this.cannyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.skinDetectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sobelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
-            this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.histogramBox1 = new Emgu.CV.UI.HistogramBox();
+            this.hOGDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -61,7 +62,8 @@
             this.cannyToolStripMenuItem,
             this.skinDetectionToolStripMenuItem,
             this.sobelToolStripMenuItem,
-            this.histogramToolStripMenuItem});
+            this.histogramToolStripMenuItem,
+            this.hOGDToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1370, 24);
@@ -133,6 +135,13 @@
             this.sobelToolStripMenuItem.Text = "Sobel";
             this.sobelToolStripMenuItem.Click += new System.EventHandler(this.sobelToolStripMenuItem_Click);
             // 
+            // histogramToolStripMenuItem
+            // 
+            this.histogramToolStripMenuItem.Name = "histogramToolStripMenuItem";
+            this.histogramToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.histogramToolStripMenuItem.Text = "Histogram";
+            this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Location = new System.Drawing.Point(15, 56);
@@ -169,19 +178,19 @@
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             // 
-            // histogramToolStripMenuItem
-            // 
-            this.histogramToolStripMenuItem.Name = "histogramToolStripMenuItem";
-            this.histogramToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
-            this.histogramToolStripMenuItem.Text = "Histogram";
-            this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
-            // 
             // histogramBox1
             // 
             this.histogramBox1.Location = new System.Drawing.Point(602, 54);
             this.histogramBox1.Name = "histogramBox1";
             this.histogramBox1.Size = new System.Drawing.Size(751, 500);
             this.histogramBox1.TabIndex = 5;
+            // 
+            // hOGDToolStripMenuItem
+            // 
+            this.hOGDToolStripMenuItem.Name = "hOGDToolStripMenuItem";
+            this.hOGDToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+            this.hOGDToolStripMenuItem.Text = "HOGD";
+            this.hOGDToolStripMenuItem.Click += new System.EventHandler(this.hOGDToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -225,6 +234,7 @@
         private System.Windows.Forms.ToolStripMenuItem sobelToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem histogramToolStripMenuItem;
         private Emgu.CV.UI.HistogramBox histogramBox1;
+        private System.Windows.Forms.ToolStripMenuItem hOGDToolStripMenuItem;
     }
 }
 
