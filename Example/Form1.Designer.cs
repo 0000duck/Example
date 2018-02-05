@@ -40,16 +40,18 @@
             this.skinDetectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sobelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.histogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hOGDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
             this.histogramBox1 = new Emgu.CV.UI.HistogramBox();
-            this.hOGDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -66,7 +68,7 @@
             this.hOGDToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1370, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1685, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -142,20 +144,27 @@
             this.histogramToolStripMenuItem.Text = "Histogram";
             this.histogramToolStripMenuItem.Click += new System.EventHandler(this.histogramToolStripMenuItem_Click);
             // 
+            // hOGDToolStripMenuItem
+            // 
+            this.hOGDToolStripMenuItem.Name = "hOGDToolStripMenuItem";
+            this.hOGDToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+            this.hOGDToolStripMenuItem.Text = "HOGD";
+            this.hOGDToolStripMenuItem.Click += new System.EventHandler(this.hOGDToolStripMenuItem_Click);
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Location = new System.Drawing.Point(15, 56);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(186, 182);
+            this.pictureBox1.Size = new System.Drawing.Size(360, 324);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(207, 54);
+            this.pictureBox2.Location = new System.Drawing.Point(398, 56);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(188, 183);
+            this.pictureBox2.Size = new System.Drawing.Size(360, 324);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 2;
             this.pictureBox2.TabStop = false;
@@ -171,32 +180,35 @@
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(401, 54);
+            this.imageBox1.Location = new System.Drawing.Point(15, 431);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(195, 183);
+            this.imageBox1.Size = new System.Drawing.Size(363, 324);
             this.imageBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             // 
             // histogramBox1
             // 
-            this.histogramBox1.Location = new System.Drawing.Point(602, 54);
+            this.histogramBox1.Location = new System.Drawing.Point(764, 40);
             this.histogramBox1.Name = "histogramBox1";
-            this.histogramBox1.Size = new System.Drawing.Size(751, 500);
+            this.histogramBox1.Size = new System.Drawing.Size(909, 715);
             this.histogramBox1.TabIndex = 5;
             // 
-            // hOGDToolStripMenuItem
+            // imageBox2
             // 
-            this.hOGDToolStripMenuItem.Name = "hOGDToolStripMenuItem";
-            this.hOGDToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
-            this.hOGDToolStripMenuItem.Text = "HOGD";
-            this.hOGDToolStripMenuItem.Click += new System.EventHandler(this.hOGDToolStripMenuItem_Click);
+            this.imageBox2.Location = new System.Drawing.Point(398, 431);
+            this.imageBox2.Name = "imageBox2";
+            this.imageBox2.Size = new System.Drawing.Size(360, 324);
+            this.imageBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBox2.TabIndex = 2;
+            this.imageBox2.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1370, 609);
+            this.ClientSize = new System.Drawing.Size(1685, 799);
+            this.Controls.Add(this.imageBox2);
             this.Controls.Add(this.histogramBox1);
             this.Controls.Add(this.imageBox1);
             this.Controls.Add(this.label1);
@@ -211,6 +223,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -235,6 +248,7 @@
         private System.Windows.Forms.ToolStripMenuItem histogramToolStripMenuItem;
         private Emgu.CV.UI.HistogramBox histogramBox1;
         private System.Windows.Forms.ToolStripMenuItem hOGDToolStripMenuItem;
+        private Emgu.CV.UI.ImageBox imageBox2;
     }
 }
 

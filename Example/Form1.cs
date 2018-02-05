@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Cuda;
 //using Emgu.CV.
 
 namespace Example
@@ -58,7 +59,7 @@ namespace Example
             }
         }*/
 
-        public bool convertToGray(Bitmap b)
+        public bool skinarea(Bitmap b)
         {
             for (int i = 0; i < b.Width; i++)
             {
@@ -73,7 +74,7 @@ namespace Example
                     float hue = c1.GetHue();
                     float sat = c1.GetSaturation();
                     float val = c1.GetBrightness();
-                    if (0.0 <= hue && hue <= 50.0 && 0.1 <= sat && sat <= 0.95 && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
+                    if (0.0 <= hue && hue <= 50.0 && 0.1 <= sat && sat <= 1 /*&& val > 130*/ && r1 > 95 && g1 > 40 && b1 > 20 && r1 > g1 && r1 > b1 && Math.Abs(r1 - g1) > 15 && a1 > 15)
                     {
                         b.SetPixel(i, j, Color.FromArgb(r1, g1, b1));
                     }
@@ -85,7 +86,6 @@ namespace Example
             }
             return true;
         }
-
         private async void playToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (capture == null)
@@ -98,29 +98,90 @@ namespace Example
                 label1.Text = "Frame Count is : " + framenum.ToString();
                 while (!Pause)
                 {
+                    
                     Mat m = new Mat();
                     capture.Read(m);
                     if (!m.IsEmpty)
                     {
-                        convertToGray(m.Bitmap);
-                        /*Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
-                        Image <Gray, byte> _imgCanny = new Image<Gray, byte>(m.Width, m.Height);
-                        _imgCanny = imgeOrigenal.Canny(150, 100);
-                        imageBox1.Image = _imgCanny;*/
-                        Image<Gray, Byte> imgeOrigenal = m.ToImage<Gray, Byte>();
-                        Image<Gray, float> _imgSobelx = new Image<Gray, float>(m.Width, m.Height);
-                        Image<Gray, float> _imgSobely = new Image<Gray, float>(m.Width, m.Height);
+
+                        //skin area
+                        skinarea(m.Bitmap);
+                        
+                  
+
+                        Image<Bgr, byte> imsrc = m.ToImage<Bgr, byte>();
+                        Image<Gray, byte> grayframe = imsrc.Convert<Gray, byte>();
+                        grayframe._EqualizeHist();
+                        CascadeClassifier  face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
+                        CascadeClassifier eye = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_eye.xml");
+
+                        var faces = face.DetectMultiScale(
+                            grayframe,
+                            1.1,
+                            10,
+                            new Size(10, 10));
+                        foreach (var f in faces)
+                        {
+                            Rectangle yuhu = Rectangle.Inflate(f, 40, 40);
+                            imsrc.Draw(yuhu, new Bgr(Color.Black),-1);
+                        }
+
+
+
+                        //medianBlur
+                        // Image<Bgr, Byte> imsrc = m.ToImage<Bgr, Byte>();
+                        Image<Bgr, Byte> _imgout = new Image<Bgr, Byte>(m.Width, m.Height);
+                        CvInvoke.MedianBlur(imsrc, _imgout, 5);
+                        pictureBox2.Image = _imgout.Bitmap;
+                        //Mat m1 = imdest.Mat;
+
+                        //contour
+                        Image<Gray, Byte> imgeOrigenal = _imgout.Convert<Gray, Byte>();//ThresholdBinary(new Gray(50), new Gray(255));
+                        Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
+                        Mat hier = new Mat();
+                        CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+                        Dictionary<int, double> dict = new Dictionary<int, double>();
+
+                        if(countour.Size > 0)
+                        {
+                            for(int i = 0; i < countour.Size; i++)
+                            {
+                                double area = CvInvoke.ContourArea(countour[i]);
+                                dict.Add(i, area);
+                            }
+                        }
+
+                        var item = dict.OrderByDescending(v => v.Value).Take(2);
+
+                        foreach(var it in item)
+                        {
+                            int key = int.Parse(it.Key.ToString());
+                            Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
+                           // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
+                        }
+
+                        imageBox1.Image = imgeOrigenal;
+
+                        //canny
+                        /*Image <Gray, byte> _imgCanny = new Image<Gray, byte>(imgeOrigenal.Width, imgeOrigenal.Height);
+                        _imgCanny = imgeOrigenal.Canny(200, 100);
+                        imageBox.Image = _imgCanny;*/
+
+                        //sobel
+                        //Image<Gray, Byte> imgeOrigenal = m1.ToImage<Gray, Byte>();
+                        Image<Gray, float> _imgSobelx = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                        Image<Gray, float> _imgSobely = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
                         _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
                         _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
-                        Image<Gray, float> magnitude = new Image<Gray, float>(m.Width, m.Height);
-                        Image<Gray, float> angle = new Image<Gray, float>(m.Width, m.Height);
+                        Image<Gray, float> magnitude = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                        Image<Gray, float> angle = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
                         CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
-                        imageBox1.Image = magnitude;
-                        imageBox1.Refresh();
+                        imageBox2.Image = magnitude;
+
+                        //histogram
                         histogramBox1.ClearHistogram();
-                        histogramBox1.GenerateHistograms(magnitude, 36);
+                        histogramBox1.GenerateHistograms(magnitude, 18);
                         histogramBox1.Refresh();
-                        pictureBox2.Image = m.Bitmap;
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
                     }
@@ -152,6 +213,7 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 capture = new VideoCapture(ofd.FileName);
@@ -189,7 +251,7 @@ namespace Example
             {
                 return;
             }
-            convertToGray(_imgInput.Bitmap);
+            skinarea(_imgInput.Bitmap);
             imageBox1.Image = _imgInput;
         }
 
@@ -235,6 +297,8 @@ namespace Example
         {
             //HOGDescriptor(magnitude);
         }
+
+        
     }
 }
 
