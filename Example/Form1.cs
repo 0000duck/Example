@@ -11,6 +11,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Cuda;
+using System.IO.MemoryMappedFiles;
 //using Emgu.CV.
 
 namespace Example
@@ -23,11 +24,12 @@ namespace Example
         {
             InitializeComponent();
         }
-
+        int i=0;
+        int fla = 0;
+        char[] arrrr = new char[10] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}; 
         VideoCapture capture;
+        VideoCapture _capture;
         Boolean Pause = false;
-
-       
 
         /*private void rgbToHsv(Bitmap bitmap)
         {
@@ -94,50 +96,52 @@ namespace Example
             }
             try
             {
+                int frmno =1;
                 double framenum = capture.GetCaptureProperty(CapProp.FrameCount);
                 label1.Text = "Frame Count is : " + framenum.ToString();
                 while (!Pause)
                 {
-                    
+
                     Mat m = new Mat();
                     capture.Read(m);
                     if (!m.IsEmpty)
                     {
-
+                        
+                        
                         //skin area
                         skinarea(m.Bitmap);
                         
-                  
-
                         Image<Bgr, byte> imsrc = m.ToImage<Bgr, byte>();
                         Image<Gray, byte> grayframe = imsrc.Convert<Gray, byte>();
-                        grayframe._EqualizeHist();
-                        CascadeClassifier  face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
+                        //grayframe._EqualizeHist();
+
+                        #region face
+                        CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
                         CascadeClassifier eye = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_eye.xml");
 
                         var faces = face.DetectMultiScale(
                             grayframe,
                             1.1,
-                            10,
+                            22,
                             new Size(10, 10));
                         foreach (var f in faces)
                         {
                             Rectangle yuhu = Rectangle.Inflate(f, 40, 40);
-                            imsrc.Draw(yuhu, new Bgr(Color.Black),-1);
+                            imsrc.Draw(yuhu, new Bgr(Color.Black), -1);
                         }
-
+                        #endregion
 
 
                         //medianBlur
                         // Image<Bgr, Byte> imsrc = m.ToImage<Bgr, Byte>();
                         Image<Bgr, Byte> _imgout = new Image<Bgr, Byte>(m.Width, m.Height);
-                        CvInvoke.MedianBlur(imsrc, _imgout, 5);
+                        CvInvoke.MedianBlur(imsrc, _imgout, 9);
                         pictureBox2.Image = _imgout.Bitmap;
                         //Mat m1 = imdest.Mat;
 
                         //contour
                         Image<Gray, Byte> imgeOrigenal = _imgout.Convert<Gray, Byte>();//ThresholdBinary(new Gray(50), new Gray(255));
-                        Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
+                        /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
                         Mat hier = new Mat();
                         CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
                         Dictionary<int, double> dict = new Dictionary<int, double>();
@@ -158,14 +162,9 @@ namespace Example
                             int key = int.Parse(it.Key.ToString());
                             Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
                            // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
-                        }
+                        }*/
 
                         imageBox1.Image = imgeOrigenal;
-
-                        //canny
-                        /*Image <Gray, byte> _imgCanny = new Image<Gray, byte>(imgeOrigenal.Width, imgeOrigenal.Height);
-                        _imgCanny = imgeOrigenal.Canny(200, 100);
-                        imageBox.Image = _imgCanny;*/
 
                         //sobel
                         //Image<Gray, Byte> imgeOrigenal = m1.ToImage<Gray, Byte>();
@@ -178,10 +177,38 @@ namespace Example
                         CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
                         imageBox2.Image = magnitude;
 
+                        Mat mag = magnitude.Mat;
+
+                        RangeF a = mag.GetValueRange();
+
+
+                        string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt");
+
+                        if(a.Max < 850)
+                        {
+                            if(fla == 0)
+                            {
+                                i++;
+                                fla = 1;
+                            }
+                            fra += "Frame Number: " + frmno + " Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString()+"                Next Gesture " + Environment.NewLine;
+                        }
+                        else
+                        {
+                            fla = 0;
+                            label2.Text = arrrr[i].ToString();
+                            fra += "Frame Number: " + frmno + " Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString() + Environment.NewLine;
+                        }
+
+                        
+                        frmno++;
+
+                        System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt", fra);
+
                         //histogram
-                        histogramBox1.ClearHistogram();
-                        histogramBox1.GenerateHistograms(magnitude, 18);
-                        histogramBox1.Refresh();
+                        /*histogramBox1.ClearHistogram();
+                        histogramBox1.GenerateHistograms(magnitude, 36);
+                        histogramBox1.Refresh();*/
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
                     }
@@ -213,10 +240,13 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 capture = new VideoCapture(ofd.FileName);
+                capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight, 240);
+                capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth, 320);
                 Mat m = new Mat();
                 capture.Read(m);
                 pictureBox1.Image = m.Bitmap;
@@ -273,17 +303,22 @@ namespace Example
             Image<Gray, float> angle = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
             CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
             imageBox1.Image = magnitude;
+
+            Mat mag = magnitude.Mat;
+            RangeF a = mag.GetValueRange();
+            label2.Text = "Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString();
+
             imageBox1.Refresh();
             histogramBox1.ClearHistogram();
             histogramBox1.GenerateHistograms(magnitude, 36);
             histogramBox1.Refresh();
             HOGDescriptor h1 = new HOGDescriptor();
-            
+
         }
 
         private void histogramToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(_imgInput==null)
+            if (_imgInput == null)
             {
                 MessageBox.Show("Please Select an image !");
                 return;
@@ -298,7 +333,55 @@ namespace Example
             //HOGDescriptor(magnitude);
         }
 
-        
+        private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (_capture == null)
+            {
+                _capture = new VideoCapture();
+            }
+            try
+            {
+                _capture = null;
+                _capture = new VideoCapture(0);
+                /*_capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
+                _capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, 240);
+                _capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, 320);
+                Time_Label.Text = "Time: ";
+                Codec_lbl.Text = "Codec: ";
+                Frame_lbl.Text = "Frame: ";
+                webcam_frm_cnt = 0;
+                cam = 1;
+                Video_seek.Value = 0;*/
+                Application.Idle += ProcessFrame;
+                /*button1.Text = "Stop";
+                comboBox1.Enabled = false;*/
+            }
+            catch (NullReferenceException excpt)
+            {
+                MessageBox.Show(excpt.Message);
+            }
+
+        }
+
+        private async void ProcessFrame(object sender, EventArgs e)
+        {
+            try
+            {
+                while (!Pause)
+                {
+
+                    Mat m = _capture.QueryFrame();
+                    pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
+                    await Task.Delay(1000);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
 }
 
