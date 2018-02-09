@@ -75,7 +75,7 @@
             this.hOGDToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1685, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1593, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -170,16 +170,16 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(15, 56);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(360, 324);
+            this.pictureBox1.Size = new System.Drawing.Size(322, 293);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(398, 56);
+            this.pictureBox2.Location = new System.Drawing.Point(362, 55);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(360, 324);
+            this.pictureBox2.Size = new System.Drawing.Size(322, 294);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 2;
             this.pictureBox2.TabStop = false;
@@ -195,25 +195,25 @@
             // 
             // imageBox1
             // 
-            this.imageBox1.Location = new System.Drawing.Point(15, 431);
+            this.imageBox1.Location = new System.Drawing.Point(15, 377);
             this.imageBox1.Name = "imageBox1";
-            this.imageBox1.Size = new System.Drawing.Size(363, 324);
+            this.imageBox1.Size = new System.Drawing.Size(322, 294);
             this.imageBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             // 
             // histogramBox1
             // 
-            this.histogramBox1.Location = new System.Drawing.Point(764, 40);
+            this.histogramBox1.Location = new System.Drawing.Point(710, 55);
             this.histogramBox1.Name = "histogramBox1";
-            this.histogramBox1.Size = new System.Drawing.Size(909, 715);
+            this.histogramBox1.Size = new System.Drawing.Size(865, 294);
             this.histogramBox1.TabIndex = 5;
             // 
             // imageBox2
             // 
-            this.imageBox2.Location = new System.Drawing.Point(398, 431);
+            this.imageBox2.Location = new System.Drawing.Point(362, 377);
             this.imageBox2.Name = "imageBox2";
-            this.imageBox2.Size = new System.Drawing.Size(360, 324);
+            this.imageBox2.Size = new System.Drawing.Size(322, 294);
             this.imageBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox2.TabIndex = 2;
             this.imageBox2.TabStop = false;
@@ -233,13 +233,17 @@
             this.chart1.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(837, 356);
+            this.chart1.Location = new System.Drawing.Point(710, 377);
             this.chart1.Name = "chart1";
             series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Color = System.Drawing.Color.Red;
             series1.Legend = "Legend1";
-            series1.Name = "Series1";
+            series1.MarkerBorderColor = System.Drawing.Color.White;
+            series1.Name = "Gradient";
+            series1.YValuesPerPoint = 2;
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(403, 287);
+            this.chart1.Size = new System.Drawing.Size(865, 294);
             this.chart1.TabIndex = 7;
             this.chart1.Text = "chart1";
             // 
@@ -247,7 +251,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1685, 799);
+            this.ClientSize = new System.Drawing.Size(1593, 687);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.imageBox2);

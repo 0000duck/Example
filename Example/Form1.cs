@@ -97,7 +97,11 @@ namespace Example
             try
             {
                 int frmno =1;
+                
                 double framenum = capture.GetCaptureProperty(CapProp.FrameCount);
+
+                float[] smoothgrad = new float[(int)framenum];
+
                 label1.Text = "Frame Count is : " + framenum.ToString();
                 while (!Pause)
                 {
@@ -106,14 +110,22 @@ namespace Example
                     capture.Read(m);
                     if (!m.IsEmpty)
                     {
-                        
-                        
-                        //skin area
+
+                        //Video is Played in PictureBox1
+                        //Mat to Image Bgr
+                        Image<Bgr, Byte> star = m.ToImage<Bgr, Byte>();
+                        pictureBox1.Image = star.ToBitmap();
+
+
+                        //skin area detection Mat
                         skinarea(m.Bitmap);
-                        
+
+                        //Mat to Image Bgr
+                        //Face detection and removal
+                        //input imsrc and grayframe
+                        //output in imsrc image
                         Image<Bgr, byte> imsrc = m.ToImage<Bgr, byte>();
                         Image<Gray, byte> grayframe = imsrc.Convert<Gray, byte>();
-                        //grayframe._EqualizeHist();
 
                         #region face
                         CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
@@ -134,13 +146,20 @@ namespace Example
 
                         //medianBlur
                         // Image<Bgr, Byte> imsrc = m.ToImage<Bgr, Byte>();
+                        //input imsrc without face
+                        //output in _imgout
                         Image<Bgr, Byte> _imgout = new Image<Bgr, Byte>(m.Width, m.Height);
-                        CvInvoke.MedianBlur(imsrc, _imgout, 9);
+                        CvInvoke.MedianBlur(imsrc, _imgout, 5);
+
+                        //Picture Box 2 Image without face
                         pictureBox2.Image = _imgout.Bitmap;
                         //Mat m1 = imdest.Mat;
 
                         //contour
-                        Image<Gray, Byte> imgeOrigenal = _imgout.Convert<Gray, Byte>();//ThresholdBinary(new Gray(50), new Gray(255));
+                        //_imgout to Gray imgeOrigenal
+                        Image<Gray, Byte> imgeOrigenal = _imgout.Convert<Gray, Byte>();
+                        #region countour
+                        //ThresholdBinary(new Gray(50), new Gray(255));
                         /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
                         Mat hier = new Mat();
                         CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
@@ -163,7 +182,9 @@ namespace Example
                             Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
                            // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
                         }*/
+                        #endregion
 
+                        //Imagebox1 gray Image without face
                         imageBox1.Image = imgeOrigenal;
 
                         //sobel
@@ -175,34 +196,35 @@ namespace Example
                         Image<Gray, float> magnitude = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
                         Image<Gray, float> angle = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
                         CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
+
+                        //Image box2 image of gradient
                         imageBox2.Image = magnitude;
 
-                        Mat mag = magnitude.Mat;
+                        Mat mat_magnitude = magnitude.Mat;
+                        RangeF max_magitude = mat_magnitude.GetValueRange();
+                        //array of max_magnitude
+                        smoothgrad[frmno] = max_magitude.Max;
 
-                        RangeF a = mag.GetValueRange();
-
+                        //chart of gradient
+                        chart1.Series["Gradient"].Points.AddXY(frmno, max_magitude.Max);
 
                         string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt");
-
-                        if(a.Max < 850)
+                        if(max_magitude.Max < 830)
                         {
                             if(fla == 0)
                             {
                                 i++;
                                 fla = 1;
                             }
-                            fra += "Frame Number: " + frmno + " Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString()+"                Next Gesture " + Environment.NewLine;
+                            fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString()+"                Next Gesture " + Environment.NewLine;
                         }
                         else
                         {
                             fla = 0;
                             label2.Text = arrrr[i].ToString();
-                            fra += "Frame Number: " + frmno + " Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString() + Environment.NewLine;
+                            fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
                         }
-
-                        
                         frmno++;
-
                         System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt", fra);
 
                         //histogram
@@ -382,6 +404,7 @@ namespace Example
                 MessageBox.Show(ex.Message);
             }
         }
+        
     }
 }
 
