@@ -149,7 +149,7 @@ namespace Example
                         //input imsrc without face
                         //output in _imgout
                         Image<Bgr, Byte> _imgout = new Image<Bgr, Byte>(m.Width, m.Height);
-                        CvInvoke.MedianBlur(imsrc, _imgout, 5);
+                        CvInvoke.MedianBlur(imsrc, _imgout, 11);
 
                         //Picture Box 2 Image without face
                         pictureBox2.Image = _imgout.Bitmap;
@@ -199,17 +199,19 @@ namespace Example
 
                         //Image box2 image of gradient
                         imageBox2.Image = magnitude;
+                        double inu = magnitude.GetAverage().Intensity;
 
                         Mat mat_magnitude = magnitude.Mat;
                         RangeF max_magitude = mat_magnitude.GetValueRange();
                         //array of max_magnitude
                         smoothgrad[frmno] = max_magitude.Max;
+                        label2.Text = frmno.ToString();
 
                         //chart of gradient
-                        chart1.Series["Gradient"].Points.AddXY(frmno, max_magitude.Max);
+                        chart1.Series["Gradient"].Points.AddXY(frmno, inu);
 
                         string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt");
-                        if(max_magitude.Max < 830)
+                        if(max_magitude.Max == 0)
                         {
                             if(fla == 0)
                             {
@@ -221,7 +223,7 @@ namespace Example
                         else
                         {
                             fla = 0;
-                            label2.Text = arrrr[i].ToString();
+                            //label2.Text = arrrr[i].ToString();
                             fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
                         }
                         frmno++;
