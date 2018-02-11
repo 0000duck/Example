@@ -184,7 +184,7 @@ namespace Example
                         //chart of gradient
                         chart1.Series["Gradient"].Points.AddXY(frmno, inu);
 
-                        string fra = System.IO.File.ReadAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt");
+                        string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\g.txt");
                         if(max_magitude.Max == 0)
                         {
                             if(fla == 0)
@@ -201,7 +201,7 @@ namespace Example
                             fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
                         }
                         frmno++;
-                        System.IO.File.WriteAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt", fra);
+                        System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", fra);
 
                         //histogram
                         /*histogramBox1.ClearHistogram();
@@ -238,7 +238,7 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            System.IO.File.WriteAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt", " ");
+            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -333,7 +333,7 @@ namespace Example
 
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", " ");
             /* if(capture1==null)
              {
                  capture1 = new Emgu.CV.VideoCapture(0);
@@ -356,18 +356,156 @@ namespace Example
 
         void ProcessFunction(object sender, EventArgs e)
         {
-            imgOrg = capture1.QueryFrame().ToImage<Bgr, byte>();
-            if (imgOrg == null)
-                return;
-            imageBox1.Image = imgOrg;
+            int frmno = 1;
+            int framenum = 2000;
 
-           /* VideoW = new VideoWriter(@"temp.avi",
-                                   CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
-                                   (Convert.ToInt32(upDownFPS.Value)),
-                                   imgOrg.Width,
-                                   imgOrg.Height,
-                                   true);
-            VideoW.WriteFrame(imgOrg);*/
+            Mat m = new Mat();
+            float[] smoothgrad = new float[(int)framenum];
+            m = capture1.QueryFrame().ToImage<Bgr, byte>().Mat;
+
+           
+            if (!m.IsEmpty)
+            {
+
+                //Video is Played in PictureBox1
+                //Mat to Image Bgr
+                Image<Bgr, Byte> star = m.ToImage<Bgr, Byte>();
+                pictureBox1.Image = star.ToBitmap();
+
+
+                //skin area detection Mat
+                skinarea(m.Bitmap);
+
+                //Mat to Image Bgr
+                //Face detection and removal
+                //input imsrc and grayframe
+                //output in imsrc image
+                Image<Bgr, byte> imsrc = m.ToImage<Bgr, byte>();
+                Image<Gray, byte> grayframe = imsrc.Convert<Gray, byte>();
+
+                #region face
+                CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
+                CascadeClassifier eye = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_eye.xml");
+
+                var faces = face.DetectMultiScale(
+                    grayframe,
+                    1.1,
+                    10,
+                    new Size(10, 10));
+                foreach (var f in faces)
+                {
+                    Rectangle yuhu = Rectangle.Inflate(f, 40, 40);
+                    imsrc.Draw(yuhu, new Bgr(Color.Black), -1);
+                }
+                #endregion
+
+
+                //medianBlur
+                // Image<Bgr, Byte> imsrc = m.ToImage<Bgr, Byte>();
+                //input imsrc without face
+                //output in _imgout
+                Image<Bgr, Byte> _imgout = new Image<Bgr, Byte>(m.Width, m.Height);
+                CvInvoke.MedianBlur(imsrc, _imgout, 51);
+
+                //Picture Box 2 Image without face
+                pictureBox2.Image = _imgout.Bitmap;
+                //Mat m1 = imdest.Mat;
+
+                //contour
+                //_imgout to Gray imgeOrigenal
+                Image<Gray, Byte> imgeOrigenal = _imgout.Convert<Gray, Byte>();
+                #region countour
+                //ThresholdBinary(new Gray(50), new Gray(255));
+                /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
+                Mat hier = new Mat();
+                CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+                Dictionary<int, double> dict = new Dictionary<int, double>();
+
+                if(countour.Size > 0)
+                {
+                    for(int i = 0; i < countour.Size; i++)
+                    {
+                        double area = CvInvoke.ContourArea(countour[i]);
+                        dict.Add(i, area);
+                    }
+                }
+
+                var item = dict.OrderByDescending(v => v.Value).Take(2);
+
+                foreach(var it in item)
+                {
+                    int key = int.Parse(it.Key.ToString());
+                    Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
+                   // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
+                }*/
+                #endregion
+
+                //Imagebox1 gray Image without face
+                imageBox1.Image = imgeOrigenal;
+
+                //sobel
+                //Image<Gray, Byte> imgeOrigenal = m1.ToImage<Gray, Byte>();
+                Image<Gray, float> _imgSobelx = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                Image<Gray, float> _imgSobely = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
+                _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
+                Image<Gray, float> magnitude = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                Image<Gray, float> angle = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+                CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
+
+                //Image box2 image of gradient
+                imageBox2.Image = magnitude;
+                double inu = magnitude.GetAverage().Intensity;
+
+                Mat mat_magnitude = magnitude.Mat;
+                RangeF max_magitude = mat_magnitude.GetValueRange();
+                //array of max_magnitude
+                smoothgrad[frmno] = max_magitude.Max;
+                label2.Text = frmno.ToString();
+
+                //chart of gradient
+                chart1.Series["Gradient"].Points.AddXY(frmno, inu);
+
+                string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\g.txt");
+                if (max_magitude.Max == 0)
+                {
+                    if (fla == 0)
+                    {
+                        i++;
+                        fla = 1;
+                    }
+                    fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + "                Next Gesture " + Environment.NewLine;
+                }
+                else
+                {
+                    fla = 0;
+                    //label2.Text = arrrr[i].ToString();
+                    fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
+                }
+                frmno++;
+                System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", fra);
+
+                //histogram
+                /*histogramBox1.ClearHistogram();
+                histogramBox1.GenerateHistograms(magnitude, 36);
+                histogramBox1.Refresh();*/
+                //double fps = capture.GetCaptureProperty(CapProp.Fps);
+                //Task.Delay(1000 / Convert.ToInt32(fps));
+            }
+            else
+            {
+            }
+
+
+
+
+            /* VideoW = new VideoWriter(@"temp.avi",
+                                    CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
+                                    (Convert.ToInt32(upDownFPS.Value)),
+                                    imgOrg.Width,
+                                    imgOrg.Height,
+                                    true);
+             VideoW.WriteFrame(imgOrg);*/
         }
 
         private void playPauseToolStripMenuItem_Click(object sender, EventArgs e)

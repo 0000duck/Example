@@ -29,14 +29,16 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openVideoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cameraInputToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playPauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +55,6 @@
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.label2 = new System.Windows.Forms.Label();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.playPauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -93,14 +94,14 @@
             // openVideoToolStripMenuItem
             // 
             this.openVideoToolStripMenuItem.Name = "openVideoToolStripMenuItem";
-            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.openVideoToolStripMenuItem.Text = "OpenVideo";
             this.openVideoToolStripMenuItem.Click += new System.EventHandler(this.openVideoToolStripMenuItem_Click);
             // 
             // openImageToolStripMenuItem
             // 
             this.openImageToolStripMenuItem.Name = "openImageToolStripMenuItem";
-            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.openImageToolStripMenuItem.Text = "OpenImage";
             this.openImageToolStripMenuItem.Click += new System.EventHandler(this.openImageToolStripMenuItem_Click);
             // 
@@ -109,9 +110,16 @@
             this.cameraInputToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.playPauseToolStripMenuItem});
             this.cameraInputToolStripMenuItem.Name = "cameraInputToolStripMenuItem";
-            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.cameraInputToolStripMenuItem.Text = "CameraInput";
             this.cameraInputToolStripMenuItem.Click += new System.EventHandler(this.cameraInputToolStripMenuItem_Click);
+            // 
+            // playPauseToolStripMenuItem
+            // 
+            this.playPauseToolStripMenuItem.Name = "playPauseToolStripMenuItem";
+            this.playPauseToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.playPauseToolStripMenuItem.Text = "Play/Pause";
+            this.playPauseToolStripMenuItem.Click += new System.EventHandler(this.playPauseToolStripMenuItem_Click);
             // 
             // playToolStripMenuItem
             // 
@@ -209,7 +217,7 @@
             // 
             this.histogramBox1.Location = new System.Drawing.Point(710, 55);
             this.histogramBox1.Name = "histogramBox1";
-            this.histogramBox1.Size = new System.Drawing.Size(865, 294);
+            this.histogramBox1.Size = new System.Drawing.Size(648, 294);
             this.histogramBox1.TabIndex = 5;
             // 
             // imageBox2
@@ -232,30 +240,23 @@
             // 
             // chart1
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(710, 377);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Color = System.Drawing.Color.Red;
-            series1.Legend = "Legend1";
-            series1.MarkerBorderColor = System.Drawing.Color.White;
-            series1.Name = "Gradient";
-            series1.YValuesPerPoint = 2;
-            this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(865, 294);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.Red;
+            series2.Legend = "Legend1";
+            series2.MarkerBorderColor = System.Drawing.Color.White;
+            series2.Name = "Gradient";
+            series2.YValuesPerPoint = 2;
+            this.chart1.Series.Add(series2);
+            this.chart1.Size = new System.Drawing.Size(648, 294);
             this.chart1.TabIndex = 7;
             this.chart1.Text = "chart1";
-            // 
-            // playPauseToolStripMenuItem
-            // 
-            this.playPauseToolStripMenuItem.Name = "playPauseToolStripMenuItem";
-            this.playPauseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.playPauseToolStripMenuItem.Text = "Play/Pause";
-            this.playPauseToolStripMenuItem.Click += new System.EventHandler(this.playPauseToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -271,6 +272,7 @@
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
