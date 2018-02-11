@@ -12,13 +12,14 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Cuda;
 using System.IO.MemoryMappedFiles;
-//using Emgu.CV.
+
 
 namespace Example
 {
     public partial class Form1 : Form
     {
         Image<Bgr, byte> _imgInput;
+        VideoCapture capture1;
 
         public Form1()
         {
@@ -28,38 +29,11 @@ namespace Example
         int fla = 0;
         char[] arrrr = new char[10] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}; 
         VideoCapture capture;
-        VideoCapture _capture;
+        //VideoCapture _capture;
         Boolean Pause = false;
-
-        /*private void rgbToHsv(Bitmap bitmap)
-        {
-            for (int i = 0; i < bitmap.Width; i++)
-            {
-                for (int j = 0; j < bitmap.Height; j++)
-                {
-                    Image<Hsv, Byte> hsvImage = new Image<Hsv, Byte>(bitmap);
-                    Hsv hsvColour = hsvImage[0, 0];
-
-                    double imgHue = hsvColour.Hue;
-                    double imgSat = hsvColour.Hue;
-                    double imgVal = hsvColour.Hue;
-
-                    //extract the hue and saturation channels
-                    Image<Gray, Byte>[] channels = hsvImage.Split();
-                    Image<Gray, Byte> imgHue = channels[0];
-                    Image<Gray, Byte> imgSat = channels[1];
-                    Image<Gray, Byte> imgVal = channels[2];
-                    if (imgHue > 0.55 || imgSat <= 0.20 || imgSat > 0.95)
-                    {
-                        bitmap.SetPixel(i, j, Color.FromArgb(0, 0, 0));
-                    }
-                    else
-                    {
-                        bitmap.SetPixel(i, j, Color.FromArgb(255, 255, 255));
-                    }
-                }
-            }
-        }*/
+        Boolean captureprocess = false;
+        Image<Bgr, Byte> imgOrg; //image type RGB (or Bgr as we say in Open CV)
+        Image<Gray, Byte> imgProc; //processed image will be grayscale so a gray image
 
         public bool skinarea(Bitmap b)
         {
@@ -210,7 +184,7 @@ namespace Example
                         //chart of gradient
                         chart1.Series["Gradient"].Points.AddXY(frmno, inu);
 
-                        string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt");
+                        string fra = System.IO.File.ReadAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt");
                         if(max_magitude.Max == 0)
                         {
                             if(fla == 0)
@@ -227,7 +201,7 @@ namespace Example
                             fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
                         }
                         frmno++;
-                        System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt", fra);
+                        System.IO.File.WriteAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt", fra);
 
                         //histogram
                         /*histogramBox1.ClearHistogram();
@@ -264,7 +238,7 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\hcbkdshgj.txt", " ");
+            System.IO.File.WriteAllText(@"C:\Users\Sakshi Kale !\Desktop\g.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -360,130 +334,83 @@ namespace Example
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            if (_capture == null)
-            {
-                _capture = new VideoCapture();
-            }
+            /* if(capture1==null)
+             {
+                 capture1 = new Emgu.CV.VideoCapture(0);
+             }
+             capture1.ImageGrabbed += Capture1_ImageGrabbed;
+             capture1.Start();*/
             try
             {
-                _capture = null;
-                _capture = new VideoCapture(0);
-                /*_capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FPS, 30);
-                _capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_HEIGHT, 240);
-                _capture.SetCaptureProperty(Emgu.CV.CvEnum.CAP_PROP.CV_CAP_PROP_FRAME_WIDTH, 320);
-                Time_Label.Text = "Time: ";
-                Codec_lbl.Text = "Codec: ";
-                Frame_lbl.Text = "Frame: ";
-                webcam_frm_cnt = 0;
-                cam = 1;
-                Video_seek.Value = 0;*/
-                Application.Idle += ProcessFrame;
-                /*button1.Text = "Stop";
-                comboBox1.Enabled = false;*/
+                capture1 = new VideoCapture();
             }
-            catch (NullReferenceException excpt)
+            catch(NullReferenceException exception)
             {
-                MessageBox.Show(excpt.Message);
+                MessageBox.Show(exception.Message);
+                return;
             }
+            Application.Idle += new EventHandler(ProcessFunction);
+            captureprocess = true;
 
         }
 
-        private async void ProcessFrame(object sender, EventArgs e)
+        void ProcessFunction(object sender, EventArgs e)
         {
-            try
+            imgOrg = capture1.QueryFrame().ToImage<Bgr, byte>();
+            if (imgOrg == null)
+                return;
+            imageBox1.Image = imgOrg;
+
+           /* VideoW = new VideoWriter(@"temp.avi",
+                                   CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
+                                   (Convert.ToInt32(upDownFPS.Value)),
+                                   imgOrg.Width,
+                                   imgOrg.Height,
+                                   true);
+            VideoW.WriteFrame(imgOrg);*/
+        }
+
+        private void playPauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(captureprocess == true)
             {
-                while (!Pause)
-                {
-
-                    Mat m = _capture.QueryFrame();
-                    pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
-                    await Task.Delay(1000);
-
-                }
+                Application.Idle -=ProcessFunction;
+                captureprocess = false;
+                playPauseToolStripMenuItem.Text = "Play";
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(ex.Message);
+                Application.Idle += ProcessFunction;
+                captureprocess = true;
+                playPauseToolStripMenuItem.Text = "Pause";
             }
         }
-        
+
+        /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
+         {
+             throw new NotImplementedException();
+         }*/
+
+        /* private async void ProcessFrame(object sender, EventArgs e)
+         {
+             try
+             {
+                 while (!Pause)
+                 {
+
+                     Mat m = _capture.QueryFrame();
+                     pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
+                     await Task.Delay(1000);
+
+                 }
+             }
+             catch (Exception ex)
+             {
+                 MessageBox.Show(ex.Message);
+             }
+         }*/
+
     }
 }
 
 
-/*using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Emgu.CV;
-using Emgu.CV.Structure;
-using Emgu.CV.CvEnum;
-
-namespace Example
-{
-    public partial class Form1 : Form
-    {
-        Image<Bgr, byte> _imgInput;
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog of = new OpenFileDialog();
-            if (of.ShowDialog() == DialogResult.OK)
-            {
-                _imgInput = new Image<Bgr, byte>(of.FileName);
-                imageBox1.Image = _imgInput;
-            }
-        }
-    }
-
-
-    public mat imgradient(mat grayscaleimage)     
-    {         
-        mat grad_x=new mat();         
-        mat grad_y = new mat();         
-        mat abs_grad_x=new mat();         
-        mat abs_grad_y=new mat();                     
-        mat gradientimag = new mat(grayscaleimage.rows(),grayscaleimage.cols(),cvtype.cv_8uc1);           
-        imgproc.sobel(grayscaleimage, grad_x, cvtype.cv_16s, 1, 0,3,1,0,imgproc.border_default );          
-        core.convertscaleabs( grad_x, abs_grad_x );                       
-        imgproc.sobel( grayscaleimage, grad_y, cvtype.cv_16s, 0, 1, 3, 1,0,imgproc.border_default );          
-        core.convertscaleabs( grad_y, abs_grad_y );                          
-        double[] buff_grad = new double[1];          
-        for(int = 0; < abs_grad_y.cols(); i++)             
-        {                 
-            for(int j =0 ; j<abs_grad_y.rows() ; j++)                 
-            {                     
-                double[] buff_x = abs_grad_x.get(j, i);                     
-                double[] buff_y = abs_grad_y.get(j, i);                     
-                double x =  buff_x[0];                     
-                double y =  buff_y[0];                     
-                double ans=0;                     
-                try                     
-                {                          
-                    ans = math.sqrt(math.pow(x,2)+math.pow(y,2));                     
-                }catch(nullpointerexception e)                     
-                {                         
-                    ans = 0;                      
-                }                     
-                buff_grad[0] =  ans;                                             
-                gradientimag.put(j, i, buff_grad);                    
-            }             
-        }                    
-        return gradientimag;     
-    }
-
-
-
-
-
-
-}*/

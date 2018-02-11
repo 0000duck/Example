@@ -53,6 +53,7 @@
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.label2 = new System.Windows.Forms.Label();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.playPauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -75,7 +76,7 @@
             this.hOGDToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1593, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1370, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -92,21 +93,23 @@
             // openVideoToolStripMenuItem
             // 
             this.openVideoToolStripMenuItem.Name = "openVideoToolStripMenuItem";
-            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openVideoToolStripMenuItem.Text = "OpenVideo";
             this.openVideoToolStripMenuItem.Click += new System.EventHandler(this.openVideoToolStripMenuItem_Click);
             // 
             // openImageToolStripMenuItem
             // 
             this.openImageToolStripMenuItem.Name = "openImageToolStripMenuItem";
-            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openImageToolStripMenuItem.Text = "OpenImage";
             this.openImageToolStripMenuItem.Click += new System.EventHandler(this.openImageToolStripMenuItem_Click);
             // 
             // cameraInputToolStripMenuItem
             // 
+            this.cameraInputToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.playPauseToolStripMenuItem});
             this.cameraInputToolStripMenuItem.Name = "cameraInputToolStripMenuItem";
-            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.cameraInputToolStripMenuItem.Text = "CameraInput";
             this.cameraInputToolStripMenuItem.Click += new System.EventHandler(this.cameraInputToolStripMenuItem_Click);
             // 
@@ -247,11 +250,18 @@
             this.chart1.TabIndex = 7;
             this.chart1.Text = "chart1";
             // 
+            // playPauseToolStripMenuItem
+            // 
+            this.playPauseToolStripMenuItem.Name = "playPauseToolStripMenuItem";
+            this.playPauseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.playPauseToolStripMenuItem.Text = "Play/Pause";
+            this.playPauseToolStripMenuItem.Click += new System.EventHandler(this.playPauseToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1593, 687);
+            this.ClientSize = new System.Drawing.Size(1370, 687);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.imageBox2);
@@ -299,6 +309,7 @@
         private System.Windows.Forms.ToolStripMenuItem cameraInputToolStripMenuItem;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private System.Windows.Forms.ToolStripMenuItem playPauseToolStripMenuItem;
     }
 }
 
