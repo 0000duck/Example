@@ -48,17 +48,18 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.imageBox1 = new Emgu.CV.UI.ImageBox();
-            this.histogramBox1 = new Emgu.CV.UI.HistogramBox();
             this.imageBox2 = new Emgu.CV.UI.ImageBox();
             this.label2 = new System.Windows.Forms.Label();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.label3 = new System.Windows.Forms.Label();
+            this.imageBox3 = new Emgu.CV.UI.ImageBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -89,14 +90,14 @@
             // openVideoToolStripMenuItem
             // 
             this.openVideoToolStripMenuItem.Name = "openVideoToolStripMenuItem";
-            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.openVideoToolStripMenuItem.Text = "OpenVideo";
             this.openVideoToolStripMenuItem.Click += new System.EventHandler(this.openVideoToolStripMenuItem_Click);
             // 
             // openImageToolStripMenuItem
             // 
             this.openImageToolStripMenuItem.Name = "openImageToolStripMenuItem";
-            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.openImageToolStripMenuItem.Text = "OpenImage";
             this.openImageToolStripMenuItem.Click += new System.EventHandler(this.openImageToolStripMenuItem_Click);
             // 
@@ -105,7 +106,7 @@
             this.cameraInputToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.playPauseToolStripMenuItem});
             this.cameraInputToolStripMenuItem.Name = "cameraInputToolStripMenuItem";
-            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.cameraInputToolStripMenuItem.Text = "CameraInput";
             this.cameraInputToolStripMenuItem.Click += new System.EventHandler(this.cameraInputToolStripMenuItem_Click);
             // 
@@ -164,7 +165,7 @@
             // pictureBox2
             // 
             this.pictureBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pictureBox2.Location = new System.Drawing.Point(362, 55);
+            this.pictureBox2.Location = new System.Drawing.Point(343, 55);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(322, 294);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -183,27 +184,20 @@
             // imageBox1
             // 
             this.imageBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.imageBox1.Location = new System.Drawing.Point(15, 377);
+            this.imageBox1.Location = new System.Drawing.Point(671, 56);
             this.imageBox1.Name = "imageBox1";
             this.imageBox1.Size = new System.Drawing.Size(322, 294);
             this.imageBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox1.TabIndex = 2;
             this.imageBox1.TabStop = false;
             // 
-            // histogramBox1
-            // 
-            this.histogramBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.histogramBox1.Location = new System.Drawing.Point(710, 55);
-            this.histogramBox1.Name = "histogramBox1";
-            this.histogramBox1.Size = new System.Drawing.Size(648, 294);
-            this.histogramBox1.TabIndex = 5;
-            // 
             // imageBox2
             // 
             this.imageBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.imageBox2.Location = new System.Drawing.Point(362, 377);
+            this.imageBox2.Location = new System.Drawing.Point(999, 56);
             this.imageBox2.Name = "imageBox2";
             this.imageBox2.Size = new System.Drawing.Size(322, 294);
+            this.imageBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBox2.TabIndex = 2;
             this.imageBox2.TabStop = false;
             // 
@@ -223,7 +217,7 @@
             this.chart1.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(710, 377);
+            this.chart1.Location = new System.Drawing.Point(343, 377);
             this.chart1.Name = "chart1";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
@@ -233,7 +227,7 @@
             series1.Name = "Gradient";
             series1.YValuesPerPoint = 2;
             this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(648, 294);
+            this.chart1.Size = new System.Drawing.Size(1015, 294);
             this.chart1.TabIndex = 7;
             this.chart1.Text = "chart1";
             // 
@@ -246,16 +240,25 @@
             this.label3.TabIndex = 8;
             this.label3.Text = "Count";
             // 
+            // imageBox3
+            // 
+            this.imageBox3.Location = new System.Drawing.Point(15, 377);
+            this.imageBox3.Name = "imageBox3";
+            this.imageBox3.Size = new System.Drawing.Size(322, 294);
+            this.imageBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBox3.TabIndex = 2;
+            this.imageBox3.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1366, 678);
+            this.Controls.Add(this.imageBox3);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.imageBox2);
-            this.Controls.Add(this.histogramBox1);
             this.Controls.Add(this.imageBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox2);
@@ -272,6 +275,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBox3)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -292,13 +296,13 @@
         private System.Windows.Forms.ToolStripMenuItem openImageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem skinDetectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sobelToolStripMenuItem;
-        private Emgu.CV.UI.HistogramBox histogramBox1;
         private Emgu.CV.UI.ImageBox imageBox2;
         private System.Windows.Forms.ToolStripMenuItem cameraInputToolStripMenuItem;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.ToolStripMenuItem playPauseToolStripMenuItem;
         private System.Windows.Forms.Label label3;
+        private Emgu.CV.UI.ImageBox imageBox3;
     }
 }
 

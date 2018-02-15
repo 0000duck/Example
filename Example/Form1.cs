@@ -104,6 +104,8 @@ namespace Example
 
             //Skin area detection
             skinAreaDetection(inputMat.Bitmap);
+            pictureBox2.Image = inputMat.Bitmap;  //Face un-eliminated image
+
 
             //Face elimination
             imageInput = inputMat.ToImage<Bgr, Byte>();
@@ -115,50 +117,42 @@ namespace Example
                 Rectangle faceRectangle = Rectangle.Inflate(f, 40, 40);
                 imageInput.Draw(faceRectangle, new Bgr(Color.Black), -1);
             }
+            imageBox1.Image = imageInput; //Face elimination
 
-            //MedianBlur
+            //MedianBlur for Ket Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
-            pictureBox2.Image = imageMedianBlur.Bitmap;
+            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 19);
+            imageBox2.Image = imageMedianBlur; //Noise Removing
 
+            //MedianBlur for Feature Extraction
+            /*Image<Bgr, Byte> imageFE = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
+            CvInvoke.MedianBlur(imageInput, imageFE, 7);
+            pictureBox2.Image = imageFE.Bitmap;*/
 
-            Image<Gray, Byte> imgeOrigenal = imageMedianBlur.Convert<Gray, Byte>();
-            
-            //Imagebox1 gray Image without face
-            imageBox1.Image = imgeOrigenal;
-
-            //sobel
-            //Image<Gray, Byte> imgeOrigenal = m1.ToImage<Gray, Byte>();
-            Image<Gray, float> _imgSobelx = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-            Image<Gray, float> _imgSobely = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-            _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
-            _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
-            Image<Gray, float> magnitude = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-            Image<Gray, float> angle = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
+            //Sobel
+            Image<Gray, float> imageSobelInput = imageMedianBlur.Convert<Gray, float>();
+            Image<Gray, float> _imgSobelx = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
+            Image<Gray, float> _imgSobely = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
+            _imgSobelx = imageSobelInput.Sobel(1, 0, 3);
+            _imgSobely = imageSobelInput.Sobel(0, 1, 3);
+            Image<Gray, float> magnitude = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
+            Image<Gray, float> angle = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
             CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
 
             //Image box2 image of gradient
-            imageBox2.Image = magnitude;
+            imageBox3.Image = magnitude;
             double inu = magnitude.GetAverage().Intensity;
 
             Mat mat_magnitude = magnitude.Mat;
-
-            ///*
-            ///
-            /// 
-            /// 
-            /// 
-            Image<Bgr, byte> ajkd = magnitude.Convert<Bgr, byte>();
+            Image<Bgr, byte> imageHogInput = imageMedianBlur.Convert<Bgr, byte>();
             HOGDescriptor ho = new HOGDescriptor();
-            float[] sdff = GetVector(ajkd);
+            float[] desc = new float[3780];
+            desc = GetVector(imageHogInput);
             string fram = "";
-            label3.Text = sdff.Length.ToString();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", sdff.Length.ToString());
+            label3.Text = desc.Length.ToString();
+            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", desc.Length.ToString());
 
-
-
-
-
+          
             RangeF max_magitude = mat_magnitude.GetValueRange();
             //array of max_magnitude
             smoothgrad[frmno] = max_magitude.Max;
@@ -185,11 +179,7 @@ namespace Example
             }
             frmno++;
             System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", fra);
-
-            //histogram
-            /*histogramBox1.ClearHistogram();
-            histogramBox1.GenerateHistograms(magnitude, 36);
-            histogramBox1.Refresh();*/
+            
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -232,7 +222,7 @@ namespace Example
         {
             HOGDescriptor hog = new HOGDescriptor();    // with defaults values
             Image<Bgr, Byte> imageOfInterest = Resize(im);
-            imageBox2.Image = imageOfInterest;
+            //imageBox3.Image = imageOfInterest;
             System.Drawing.Point[] p = new System.Drawing.Point[imageOfInterest.Width * imageOfInterest.Height];
             int k = 0;
             for (int i = 0; i < imageOfInterest.Width; i++)
@@ -244,6 +234,7 @@ namespace Example
                 }
             }
             float[] result = hog.Compute(imageOfInterest, new System.Drawing.Size(16, 16), new System.Drawing.Size(0, 0), p);
+            label2.Text = hog.DescriptorSize.ToString();
             return result;
         }
 
@@ -266,33 +257,31 @@ namespace Example
 
             //IOutputArray magnitude;
             // IOutputArray angle;
-            Image<Gray, byte> imgeOrigenal = _imgInput.Convert<Gray, byte>();
+            Image<Gray, byte> imageSobelInput = _imgInput.Convert<Gray, byte>();
             Image<Gray, float> _imgSobelx = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
             Image<Gray, float> _imgSobely = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
-            _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
-            _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
+            _imgSobelx = imageSobelInput.Sobel(1, 0, 3);
+            _imgSobely = imageSobelInput.Sobel(0, 1, 3);
             Image<Gray, float> magnitude = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
             Image<Gray, float> angle = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
             CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
             imageBox1.Image = magnitude;
 
             Mat mag = magnitude.Mat;
-            Image<Bgr, byte> ajkd = magnitude.Convert<Bgr, byte>();
+            //Wrong...............Wrong
+            Image<Bgr, byte> imageHogInput = magnitude.Convert<Bgr, byte>();
             RangeF a = mag.GetValueRange();
             label2.Text = "Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString();
             
-            imageBox1.Refresh();
-            histogramBox1.ClearHistogram();
-            histogramBox1.GenerateHistograms(magnitude, 36);
-            histogramBox1.Refresh();
             HOGDescriptor ho = new HOGDescriptor();
-            float[] sdff = GetVector(ajkd);
+            float[] desc = new float[3780];
+            desc = GetVector(imageHogInput);
             string fra = "";
-            label3.Text = sdff.GetValue(10).ToString();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", sdff.Length.ToString());
-            /*for (int i = 0; i< sdff.Length; i++)
+            label3.Text = desc.Length.ToString();// desc.GetValue(10).ToString();
+            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", desc.Length.ToString());
+            /*for (int i = 0; i< desc.Length; i++)
             {
-                fra = "Frame Number: " + i + " Value " + sdff.GetValue(i).ToString() + Environment.NewLine;
+                fra = "Frame Number: " + i + " Value " + desc.GetValue(i).ToString() + Environment.NewLine;
                 System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", fra);
             }*/
 
@@ -323,150 +312,27 @@ namespace Example
 
         void ProcessFunction(object sender, EventArgs e)
         {
-            int frmno = 1;
             int frameNumber = 2000;
 
-            Mat m = new Mat();
-            float[] smoothgrad = new float[(int)frameNumber];
-            m = capture1.QueryFrame();
-
-           
-            if (!m.IsEmpty)
+            if (!capture1.QueryFrame().IsEmpty) { }
+                
+            if (!capture1.QueryFrame().IsEmpty)
             {
-
-                //Video is Played in PictureBox1
-                //Mat to Image Bgr
-                Image<Bgr, Byte> star = m.ToImage<Bgr, Byte>();
-                pictureBox1.Image = star.ToBitmap();
-
-
-                //skin area detection Mat
-                skinAreaDetection(m.Bitmap);
-
-                //Mat to Image Bgr
-                //Face detection and removal
-                //input imsrc and grayframe
-                //output in imsrc image
-                Image<Bgr, byte> imsrc = m.ToImage<Bgr, byte>();
-                Image<Gray, byte> grayframe = imsrc.Convert<Gray, byte>();
-
-                #region face
-                CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
-                CascadeClassifier eye = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_eye.xml");
-
-                var faces = face.DetectMultiScale(
-                    grayframe,
-                    1.1,
-                    10,
-                    new Size(10, 10));
-                foreach (var f in faces)
+                Mat matInput = capture1.QueryFrame();
+                float[] smoothgrad = new float[(int)frameNumber];
+                if (!matInput.IsEmpty)
                 {
-                    Rectangle yuhu = Rectangle.Inflate(f, 40, 40);
-                    imsrc.Draw(yuhu, new Bgr(Color.Black), -1);
-                }
-                #endregion
-
-
-                //medianBlur
-                // Image<Bgr, Byte> imsrc = m.ToImage<Bgr, Byte>();
-                //input imsrc without face
-                //output in imageMedianBlur
-                Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(m.Width, m.Height);
-                CvInvoke.MedianBlur(imsrc, imageMedianBlur, 51);
-
-                //Picture Box 2 Image without face
-                pictureBox2.Image = imageMedianBlur.Bitmap;
-                //Mat m1 = imdest.Mat;
-
-                //contour
-                //imageMedianBlur to Gray imgeOrigenal
-                Image<Gray, Byte> imgeOrigenal = imageMedianBlur.Convert<Gray, Byte>();
-                #region countour
-                //ThresholdBinary(new Gray(50), new Gray(255));
-                /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
-                Mat hier = new Mat();
-                CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
-                Dictionary<int, double> dict = new Dictionary<int, double>();
-
-                if(countour.Size > 0)
-                {
-                    for(int i = 0; i < countour.Size; i++)
-                    {
-                        double area = CvInvoke.ContourArea(countour[i]);
-                        dict.Add(i, area);
-                    }
+                    modulePreProcessing(matInput, smoothgrad);
                 }
 
-                var item = dict.OrderByDescending(v => v.Value).Take(2);
-
-                foreach(var it in item)
-                {
-                    int key = int.Parse(it.Key.ToString());
-                    Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
-                   // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
-                }*/
-                #endregion
-
-                //Imagebox1 gray Image without face
-                imageBox1.Image = imgeOrigenal;
-
-                //sobel
-                //Image<Gray, Byte> imgeOrigenal = m1.ToImage<Gray, Byte>();
-                Image<Gray, float> _imgSobelx = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-                Image<Gray, float> _imgSobely = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-                _imgSobelx = imgeOrigenal.Sobel(1, 0, 3);
-                _imgSobely = imgeOrigenal.Sobel(0, 1, 3);
-                Image<Gray, float> magnitude = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-                Image<Gray, float> angle = new Image<Gray, float>(imgeOrigenal.Width, imgeOrigenal.Height);
-                CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
-
-                //Image box2 image of gradient
-                imageBox2.Image = magnitude;
-                double inu = magnitude.GetAverage().Intensity;
-
-                Mat mat_magnitude = magnitude.Mat;
-                RangeF max_magitude = mat_magnitude.GetValueRange();
-                //array of max_magnitude
-                smoothgrad[frmno] = max_magitude.Max;
-                label2.Text = frmno.ToString();
-
-                //chart of gradient
-                chart1.Series["Gradient"].Points.AddXY(frmno, inu);
-
-                string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\g.txt");
-                if (max_magitude.Max == 0)
-                {
-                    if (fla == 0)
-                    {
-                        i++;
-                        fla = 1;
-                    }
-                    fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + "                Next Gesture " + Environment.NewLine;
-                }
-                else
-                {
-                    fla = 0;
-                    //label2.Text = arrrr[i].ToString();
-                    fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
-                }
-                frmno++;
-                System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", fra);
-
-                //histogram
-                /*histogramBox1.ClearHistogram();
-                histogramBox1.GenerateHistograms(magnitude, 36);
-                histogramBox1.Refresh();*/
-                //double fps = capture.GetCaptureProperty(CapProp.Fps);
-                //Task.Delay(1000 / Convert.ToInt32(fps));
-            }
-
-            /* VideoW = new VideoWriter(@"temp.avi",
+                /* VideoW = new VideoWriter(@"temp.avi",
                                     CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
                                     (Convert.ToInt32(upDownFPS.Value)),
                                     imgOrg.Width,
                                     imgOrg.Height,
                                     true);
-             VideoW.WriteFrame(imgOrg);*/
+                VideoW.WriteFrame(imgOrg);*/
+            }
         }
 
         private void playPauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -518,7 +384,7 @@ namespace Example
          }*/
         /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
         Mat hier = new Mat();
-        CvInvoke.FindContours(imgeOrigenal, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+        CvInvoke.FindContours(imageSobelInput, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
         Dictionary<int, double> dict = new Dictionary<int, double>();
 
         if(countour.Size > 0)
@@ -536,7 +402,7 @@ namespace Example
         {
             int key = int.Parse(it.Key.ToString());
             Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
-           // CvInvoke.Rectangle(imgeOrigenal, rect, new MCvScalar(255, 0, 0));
+           // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
         }*/
         #endregion
 
