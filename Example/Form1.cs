@@ -19,11 +19,18 @@ namespace Example
 {
     public partial class Form1 : Form
     {
+        #region declaration
+        VideoWriter VideoW;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
+        int first = -1;
+        int last = -1;
         VideoCapture capture;
         Boolean Pause = false;
-        Boolean captureprocess = false;
+        Boolean captureProcess = false;
+        Boolean isFirst = false;
+        Boolean isLast = false;
+        #endregion
 
         public Form1()
         {
@@ -69,12 +76,17 @@ namespace Example
                 double frameNumber = capture.GetCaptureProperty(CapProp.FrameCount);
                 float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
+                VideoW = new VideoWriter(@"temp.avi",
+                                    Convert.ToInt32(capture.GetCaptureProperty(CapProp.Fps)),
+                                    new Size(capture.Width, capture.Height),
+                                    true);
                 while (!Pause)
                 {
                     Mat matInput = new Mat();
                     capture.Read(matInput);
                     if (!matInput.IsEmpty)
                     {
+                        
                         modulePreProcessing(matInput, smoothgrad);
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
@@ -116,17 +128,12 @@ namespace Example
 
             //MedianBlur for Key Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 19);
+            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
             imageBox2.Image = imageMedianBlur; //Noise Removing
 
 
-            /*VideoWriter VideoW = new VideoWriter(@"temp.avi",
-                                    CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
-                                    (Convert.ToInt32(upDownFPS.Value)),
-                                    imgOrg.Width,
-                                    imgOrg.Height,
-                                    true);
-            VideoW.WriteFrame(imgOrg);
+            
+            VideoW.Write(imageMedianBlur.Mat);
 
             //MedianBlur for Feature Extraction
             /*Image<Bgr, Byte> imageFE = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
@@ -152,19 +159,33 @@ namespace Example
             
             //Chart of gradient
             chart1.Series["Gradient"].Points.AddXY(frameNumber, avg);
-            
 
+            if (!isFirst)
+            {
+                if(avg > 0)
+                {
+                    isFirst = true;
+                    first = frameNumber;
+                    isLast = false;
+                }
+            }
+            if (!isLast)
+            {
+                if (avg == 0)
+                {
+                    isLast = true;
+                    last = frameNumber;
+                    label3.Text = "First: " + first + " Last: " + last;
+                    isFirst = false;
+                }
+            }
 
-
-
-            
             Image<Bgr, byte> imageHogInput = imageMedianBlur.Convert<Bgr, byte>();
             HOGDescriptor ho = new HOGDescriptor();
             float[] desc = new float[3780];
             desc = GetVector(imageHogInput);
             string fram = "";
-            label3.Text = desc.Length.ToString();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", desc.Length.ToString());
+            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());
 
             frameNumber++;
             
@@ -178,7 +199,7 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", " ");
+            System.IO.File.WriteAllText(@"g.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -265,18 +286,18 @@ namespace Example
             desc = GetVector(imageHogInput);
             string fra = "";
             label3.Text = desc.Length.ToString();// desc.GetValue(10).ToString();
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", desc.Length.ToString());
+            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());
             /*for (int i = 0; i< desc.Length; i++)
             {
                 fra = "Frame Number: " + i + " Value " + desc.GetValue(i).ToString() + Environment.NewLine;
-                System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", fra);
+                System.IO.File.WriteAllText(@"des.txt", fra);
             }*/
 
         }
 
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", " ");
+            System.IO.File.WriteAllText(@"g.txt", " ");
             /* if(capture==null)
              {
                  capture = new Emgu.CV.VideoCapture(0);
@@ -293,7 +314,7 @@ namespace Example
                 return;
             }
             Application.Idle += new EventHandler(ProcessFunction);
-            captureprocess = true;
+            captureProcess = true;
 
         }
 
@@ -318,16 +339,16 @@ namespace Example
 
         private void playPauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(captureprocess == true)
+            if(captureProcess == true)
             {
                 Application.Idle -=ProcessFunction;
-                captureprocess = false;
+                captureProcess = false;
                 playPauseToolStripMenuItem.Text = "Play";
             }
             else
             {
                 Application.Idle += ProcessFunction;
-                captureprocess = true;
+                captureProcess = true;
                 playPauseToolStripMenuItem.Text = "Pause";
             }
         }
