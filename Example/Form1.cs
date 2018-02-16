@@ -20,20 +20,15 @@ namespace Example
     public partial class Form1 : Form
     {
         Image<Bgr, byte> _imgInput;
-        VideoCapture capture1;
+        int frameNumber = 1;
+        VideoCapture capture;
+        Boolean Pause = false;
+        Boolean captureprocess = false;
 
         public Form1()
         {
             InitializeComponent();
         }
-
-        int i=0;
-        int fla = 0;
-        int frmno = 1;
-        char[] arrrr = new char[10] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}; 
-        VideoCapture capture;
-        Boolean Pause = false;
-        Boolean captureprocess = false;
 
         public bool skinAreaDetection(Bitmap b)
         {
@@ -119,10 +114,19 @@ namespace Example
             }
             imageBox1.Image = imageInput; //Face elimination
 
-            //MedianBlur for Ket Frame Extraction
+            //MedianBlur for Key Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
             CvInvoke.MedianBlur(imageInput, imageMedianBlur, 19);
             imageBox2.Image = imageMedianBlur; //Noise Removing
+
+
+            /*VideoWriter VideoW = new VideoWriter(@"temp.avi",
+                                    CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
+                                    (Convert.ToInt32(upDownFPS.Value)),
+                                    imgOrg.Width,
+                                    imgOrg.Height,
+                                    true);
+            VideoW.WriteFrame(imgOrg);
 
             //MedianBlur for Feature Extraction
             /*Image<Bgr, Byte> imageFE = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
@@ -141,9 +145,19 @@ namespace Example
 
             //Image box2 image of gradient
             imageBox3.Image = magnitude;
-            double inu = magnitude.GetAverage().Intensity;
+            //FrameNumber Display
+            label2.Text = frameNumber.ToString();
 
-            Mat mat_magnitude = magnitude.Mat;
+            double avg = magnitude.GetAverage().Intensity;
+            
+            //Chart of gradient
+            chart1.Series["Gradient"].Points.AddXY(frameNumber, avg);
+            
+
+
+
+
+            
             Image<Bgr, byte> imageHogInput = imageMedianBlur.Convert<Bgr, byte>();
             HOGDescriptor ho = new HOGDescriptor();
             float[] desc = new float[3780];
@@ -152,33 +166,7 @@ namespace Example
             label3.Text = desc.Length.ToString();
             System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\des.txt", desc.Length.ToString());
 
-          
-            RangeF max_magitude = mat_magnitude.GetValueRange();
-            //array of max_magnitude
-            smoothgrad[frmno] = max_magitude.Max;
-            label2.Text = frmno.ToString();
-
-            //chart of gradient
-            chart1.Series["Gradient"].Points.AddXY(frmno, inu);
-
-            string fra = System.IO.File.ReadAllText(@"C:\Users\rhiray1996\Desktop\g.txt");
-            if (max_magitude.Max == 0)
-            {
-                if (fla == 0)
-                {
-                    i++;
-                    fla = 1;
-                }
-                fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + "                Next Gesture " + Environment.NewLine;
-            }
-            else
-            {
-                fla = 0;
-                //label2.Text = arrrr[i].ToString();
-                fra += "Frame Number: " + frmno + " Max: " + max_magitude.Max.ToString() + "  Min: " + max_magitude.Min.ToString() + Environment.NewLine;
-            }
-            frmno++;
-            System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", fra);
+            frameNumber++;
             
         }
 
@@ -213,7 +201,7 @@ namespace Example
             }
         }
 
-        public Image<Bgr, Byte> Resize(Image<Bgr, Byte> im)
+        public Image<Bgr, Byte> resize(Image<Bgr, Byte> im)
         {
             return im.Resize(64, 128, Emgu.CV.CvEnum.Inter.Linear);
         }
@@ -221,7 +209,7 @@ namespace Example
         public float[] GetVector(Image<Bgr, Byte> im)
         {
             HOGDescriptor hog = new HOGDescriptor();    // with defaults values
-            Image<Bgr, Byte> imageOfInterest = Resize(im);
+            Image<Bgr, Byte> imageOfInterest = resize(im);
             //imageBox3.Image = imageOfInterest;
             System.Drawing.Point[] p = new System.Drawing.Point[imageOfInterest.Width * imageOfInterest.Height];
             int k = 0;
@@ -234,7 +222,6 @@ namespace Example
                 }
             }
             float[] result = hog.Compute(imageOfInterest, new System.Drawing.Size(16, 16), new System.Drawing.Size(0, 0), p);
-            label2.Text = hog.DescriptorSize.ToString();
             return result;
         }
 
@@ -290,15 +277,15 @@ namespace Example
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.IO.File.WriteAllText(@"C:\Users\rhiray1996\Desktop\g.txt", " ");
-            /* if(capture1==null)
+            /* if(capture==null)
              {
-                 capture1 = new Emgu.CV.VideoCapture(0);
+                 capture = new Emgu.CV.VideoCapture(0);
              }
-             capture1.ImageGrabbed += Capture1_ImageGrabbed;
-             capture1.Start();*/
+             capture.ImageGrabbed += Capture1_ImageGrabbed;
+             capture.Start();*/
             try
             {
-                capture1 = new VideoCapture();
+                capture = new VideoCapture();
             }
             catch(NullReferenceException exception)
             {
@@ -314,24 +301,18 @@ namespace Example
         {
             int frameNumber = 2000;
 
-            if (!capture1.QueryFrame().IsEmpty) { }
+            if (!capture.QueryFrame().IsEmpty) { }
                 
-            if (!capture1.QueryFrame().IsEmpty)
+            if (!capture.QueryFrame().IsEmpty)
             {
-                Mat matInput = capture1.QueryFrame();
+                Mat matInput = capture.QueryFrame();
                 float[] smoothgrad = new float[(int)frameNumber];
                 if (!matInput.IsEmpty)
                 {
                     modulePreProcessing(matInput, smoothgrad);
                 }
 
-                /* VideoW = new VideoWriter(@"temp.avi",
-                                    CvInvoke.CV_FOURCC('M', 'P', '4', '2'),
-                                    (Convert.ToInt32(upDownFPS.Value)),
-                                    imgOrg.Width,
-                                    imgOrg.Height,
-                                    true);
-                VideoW.WriteFrame(imgOrg);*/
+                
             }
         }
 
