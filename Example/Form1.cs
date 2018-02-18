@@ -26,6 +26,7 @@ namespace Example
         int first = -1;
         int last = -1;
         VideoCapture capture;
+        VideoCapture captureFeature;
         Boolean Pause = false;
         Boolean captureProcess = false;
         Boolean isFirst = false;
@@ -77,7 +78,8 @@ namespace Example
                 float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
                 VideoW = new VideoWriter(@"temp.avi",
-                                    Convert.ToInt32(capture.GetCaptureProperty(CapProp.Fps)),
+                                    VideoWriter.Fourcc('I','Y','U','V')/*Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
+                                    30,
                                     new Size(capture.Width, capture.Height),
                                     true);
                 while (!Pause)
@@ -112,8 +114,7 @@ namespace Example
             //Skin area detection
             skinAreaDetection(inputMat.Bitmap);
             pictureBox2.Image = inputMat.Bitmap;  //Face un-eliminated image
-
-
+            
             //Face elimination
             imageInput = inputMat.ToImage<Bgr, Byte>();
             Image<Gray, byte> grayframe = imageInput.Convert<Gray, byte>();
@@ -131,8 +132,6 @@ namespace Example
             CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
             imageBox2.Image = imageMedianBlur; //Noise Removing
 
-
-            
             VideoW.Write(imageMedianBlur.Mat);
 
             //MedianBlur for Feature Extraction
@@ -149,17 +148,13 @@ namespace Example
             Image<Gray, float> magnitude = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
             Image<Gray, float> angle = new Image<Gray, float>(imageSobelInput.Width, imageSobelInput.Height);
             CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
-
             //Image box2 image of gradient
             imageBox3.Image = magnitude;
             //FrameNumber Display
             label2.Text = frameNumber.ToString();
-
             double avg = magnitude.GetAverage().Intensity;
-            
             //Chart of gradient
             chart1.Series["Gradient"].Points.AddXY(frameNumber, avg);
-
             if (!isFirst)
             {
                 if(avg > 0)
@@ -176,19 +171,37 @@ namespace Example
                     isLast = true;
                     last = frameNumber;
                     label3.Text = "First: " + first + " Last: " + last;
+                    int mid = (first + last) / 2;
+                    moduleFeatureExtraction(mid);
                     isFirst = false;
                 }
             }
-
             Image<Bgr, byte> imageHogInput = imageMedianBlur.Convert<Bgr, byte>();
             HOGDescriptor ho = new HOGDescriptor();
             float[] desc = new float[3780];
             desc = GetVector(imageHogInput);
-            string fram = "";
             System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());
-
             frameNumber++;
-            
+        }
+
+        private async void moduleFeatureExtraction(int mid)
+        {
+            captureFeature = new VideoCapture(@"temp.avi");
+            captureFeature.SetCaptureProperty(CapProp.PosFrames, (mid - 10));
+            while (!Pause)
+            {
+                Mat matInput = new Mat();
+                captureFeature.Read(matInput);
+                if (!matInput.IsEmpty)
+                {
+                    pictureBox3.Image = matInput.Bitmap;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
