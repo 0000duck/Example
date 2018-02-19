@@ -78,7 +78,7 @@ namespace Example
                 float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
                 VideoW = new VideoWriter(@"temp.avi",
-                                    VideoWriter.Fourcc('I','Y','U','V')/*Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
+                                    VideoWriter.Fourcc('M','J','P','G')/*Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
                                     30,
                                     new Size(capture.Width, capture.Height),
                                     true);
@@ -187,19 +187,25 @@ namespace Example
         private async void moduleFeatureExtraction(int mid)
         {
             captureFeature = new VideoCapture(@"temp.avi");
-            captureFeature.SetCaptureProperty(CapProp.PosFrames, (mid - 10));
-            while (!Pause)
+            if (captureFeature == null)
             {
-                Mat matInput = new Mat();
-                captureFeature.Read(matInput);
-                if (!matInput.IsEmpty)
+                return;
+            }
+            try
+            {
+                for(int k = (mid-8) ; k<= (mid + 8); k++)
                 {
-                    pictureBox3.Image = matInput.Bitmap;
+                    captureFeature.SetCaptureProperty(CapProp.PosFrames, k);
+                    Mat m1 = new Mat();
+                    m1 = captureFeature.QueryFrame();
+                    pictureBox3.Image = m1.Bitmap;
+                    label4.Text = k.ToString();
+                    await Task.Delay(1000 / Convert.ToInt32(2));
                 }
-                else
-                {
-                    break;
-                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
 
         }
