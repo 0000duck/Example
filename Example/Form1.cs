@@ -21,6 +21,7 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
+        string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
         int first = -1;
@@ -78,7 +79,7 @@ namespace Example
                 float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
                 VideoW = new VideoWriter(@"temp.avi",
-                                    VideoWriter.Fourcc('M','J','P','G')/*Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
+                                    FourCC.H264/*VideoWriter.Fourcc('M','J','P','G')Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
                                     30,
                                     new Size(capture.Width, capture.Height),
                                     true);
@@ -89,7 +90,7 @@ namespace Example
                     if (!matInput.IsEmpty)
                     {
                         
-                        modulePreProcessing(matInput, smoothgrad);
+                        moduleKeyFrameExtraction(matInput);
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
                     }
@@ -105,35 +106,10 @@ namespace Example
             }
         }
 
-        private void modulePreProcessing(Mat inputMat, float[] smoothgrad)
+        private void moduleKeyFrameExtraction(Mat inputMat)
         {
-            //Actual video is played in pictureBox1
-            Image<Bgr, Byte> imageInput = inputMat.ToImage<Bgr, Byte>();
-            pictureBox1.Image = imageInput.ToBitmap();
 
-            //Skin area detection
-            skinAreaDetection(inputMat.Bitmap);
-            pictureBox2.Image = inputMat.Bitmap;  //Face un-eliminated image
-            
-            //Face elimination
-            imageInput = inputMat.ToImage<Bgr, Byte>();
-            Image<Gray, byte> grayframe = imageInput.Convert<Gray, byte>();
-            CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
-            var faces = face.DetectMultiScale( grayframe, 1.1, 22, new Size(10, 10));
-            foreach (var f in faces)
-            {
-                Rectangle faceRectangle = Rectangle.Inflate(f, 40, 40);
-                imageInput.Draw(faceRectangle, new Bgr(Color.Black), -1);
-            }
-            imageBox1.Image = imageInput; //Face elimination
-
-            //MedianBlur for Key Frame Extraction
-            Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
-            imageBox2.Image = imageMedianBlur; //Noise Removing
-
-            VideoW.Write(imageMedianBlur.Mat);
-
+            Image<Bgr, Byte>  imageMedianBlur = modulePreProcessing(inputMat);
             //MedianBlur for Feature Extraction
             /*Image<Bgr, Byte> imageFE = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
             CvInvoke.MedianBlur(imageInput, imageFE, 7);
@@ -176,38 +152,63 @@ namespace Example
                     isFirst = false;
                 }
             }
-            Image<Bgr, byte> imageHogInput = imageMedianBlur.Convert<Bgr, byte>();
-            HOGDescriptor ho = new HOGDescriptor();
-            float[] desc = new float[3780];
-            desc = GetVector(imageHogInput);
-            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());
             frameNumber++;
+        }
+        
+        private Image<Bgr, byte> modulePreProcessing( Mat inputMat)
+        {
+
+            //Actual video is played in pictureBox1
+            Image<Bgr, Byte> imageInput = inputMat.ToImage<Bgr, Byte>();
+            pictureBox1.Image = imageInput.ToBitmap();
+            
+            
+            //Skin area detection
+            skinAreaDetection(inputMat.Bitmap);
+            pictureBox2.Image = inputMat.Bitmap;  //Face un-eliminated image
+
+            //Face elimination
+            imageInput = inputMat.ToImage<Bgr, Byte>();
+            Image<Gray, byte> grayframe = imageInput.Convert<Gray, byte>();
+            CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
+            var faces = face.DetectMultiScale(grayframe, 1.1, 22, new Size(10, 10));
+            foreach (var f in faces)
+            {
+                Rectangle faceRectangle = Rectangle.Inflate(f, 40, 40);
+                imageInput.Draw(faceRectangle, new Bgr(Color.Black), -1);
+            }
+            imageBox1.Image = imageInput; //Face elimination
+
+            Image<Bgr, Byte> imageMedianBlurForExtraction = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
+            CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 15);
+            imageBox2.Image = imageMedianBlurForExtraction; //Noise Removing
+            Image<Bgr, Byte> real = resize(imageMedianBlurForExtraction);
+            frameName = "gesture\\" + frameNumber + ".jpeg";
+            real.Save(frameName);
+
+            //MedianBlur for KeySize(imageMedianBlur.Width, imageMedianBlur.Height) Frame Extraction
+            Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
+            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
+            imageBox2.Image = imageMedianBlur; //Noise Removing
+
+            
+            
+            return imageMedianBlur;
         }
 
         private async void moduleFeatureExtraction(int mid)
         {
-            captureFeature = new VideoCapture(@"temp.avi");
-            if (captureFeature == null)
+            for(int k = (mid-8) ; k<= (mid + 8); k++)
             {
-                return;
+                string frameName = "gesture//" + k + ".jpeg";
+                Image<Bgr, byte > wow = new Image<Bgr, byte>(frameName);
+                pictureBox3.Image = wow.Bitmap;
+                label4.Text = k.ToString();
+                await Task.Delay(1000 / Convert.ToInt32(2));
+                float[] desc = new float[3780];
+                desc = GetVector(wow);
+                OpticalFlowPCAFlow opticalFlowPCAFlow = new OpticalFlowPCAFlow();
             }
-            try
-            {
-                for(int k = (mid-8) ; k<= (mid + 8); k++)
-                {
-                    captureFeature.SetCaptureProperty(CapProp.PosFrames, k);
-                    Mat m1 = new Mat();
-                    m1 = captureFeature.QueryFrame();
-                    pictureBox3.Image = m1.Bitmap;
-                    label4.Text = k.ToString();
-                    await Task.Delay(1000 / Convert.ToInt32(2));
-                }
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -222,6 +223,7 @@ namespace Example
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
+                frameNumber = 0;
                 capture = new VideoCapture(ofd.FileName);
                 capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight, 240);
                 capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth, 320);
@@ -236,6 +238,7 @@ namespace Example
             OpenFileDialog of = new OpenFileDialog();
             if (of.ShowDialog() == DialogResult.OK)
             {
+                
                 _imgInput = new Image<Bgr, byte>(of.FileName);
                 imageBox1.Image = _imgInput;
             }
@@ -246,11 +249,9 @@ namespace Example
             return im.Resize(64, 128, Emgu.CV.CvEnum.Inter.Linear);
         }
 
-        public float[] GetVector(Image<Bgr, Byte> im)
+        public float[] GetVector(Image<Bgr, Byte> imageOfInterest)
         {
             HOGDescriptor hog = new HOGDescriptor();    // with defaults values
-            Image<Bgr, Byte> imageOfInterest = resize(im);
-            //imageBox3.Image = imageOfInterest;
             System.Drawing.Point[] p = new System.Drawing.Point[imageOfInterest.Width * imageOfInterest.Height];
             int k = 0;
             for (int i = 0; i < imageOfInterest.Width; i++)
@@ -302,10 +303,10 @@ namespace Example
             
             HOGDescriptor ho = new HOGDescriptor();
             float[] desc = new float[3780];
-            desc = GetVector(imageHogInput);
+            /*desc = GetVector(imageHogInput);
             string fra = "";
             label3.Text = desc.Length.ToString();// desc.GetValue(10).ToString();
-            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());
+            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());*/
             /*for (int i = 0; i< desc.Length; i++)
             {
                 fra = "Frame Number: " + i + " Value " + desc.GetValue(i).ToString() + Environment.NewLine;
@@ -349,7 +350,7 @@ namespace Example
                 float[] smoothgrad = new float[(int)frameNumber];
                 if (!matInput.IsEmpty)
                 {
-                    modulePreProcessing(matInput, smoothgrad);
+                    moduleKeyFrameExtraction(matInput);
                 }
 
                 
