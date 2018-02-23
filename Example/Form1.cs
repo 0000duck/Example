@@ -13,8 +13,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Cuda;
 using System.IO.MemoryMappedFiles;
-using System.IO;
-using System.Drawing.Imaging;
+
 
 namespace Example
 {
@@ -184,30 +183,60 @@ namespace Example
             CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 15);
             imageBox2.Image = imageMedianBlurForExtraction; //Noise Removing
             Image<Bgr, Byte> real = resize(imageMedianBlurForExtraction);
-            frameName = "gesture\\" + frameNumber + ".jpg";
+            frameName = "gesture\\" + frameNumber + ".jpeg";
             real.Save(frameName);
-            
+
             //MedianBlur for KeySize(imageMedianBlur.Width, imageMedianBlur.Height) Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);//
-            
+            CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
             imageBox2.Image = imageMedianBlur; //Noise Removing
+
+            
             
             return imageMedianBlur;
         }
 
         private async void moduleFeatureExtraction(int mid)
         {
-            for(int k = (mid-8) ; k<= (mid + 8); k++)
+            double[,] RawData = new double[10, 3780];
+            for (int k = (mid-5) ; k< (mid + 5); k++)
             {
-                string frameName = "gesture\\" + k + ".jpg";
+                string frameName = "gesture//" + k + ".jpeg";
                 Image<Bgr, byte > wow = new Image<Bgr, byte>(frameName);
                 pictureBox3.Image = wow.Bitmap;
                 label4.Text = k.ToString();
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
                 desc = GetVector(wow);
-                OpticalFlowPCAFlow opticalFlowPCAFlow = new OpticalFlowPCAFlow();
+
+                int i = k - (mid - 5);
+                for (int j = 0; j < 3780; j++)
+                    {
+                        double val = Convert.ToDouble(desc[j]);
+                        RawData.SetValue(val, i, j);
+                    }
+
+                if (k == (mid + 4))
+                {
+                    Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
+                    Matrix<Double> Mean = new Matrix<Double>(1, 3780);
+                    Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
+                    Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
+                    CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 10);
+                    Matrix<Double> result = new Matrix<Double>(10, 10);
+                    CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
+                    string djf = null;
+                    for(int p = 0; p < 10; p++)
+                    {
+                        for (int q = 0; q < 10; q++)
+                        {
+                            djf += p + " , "+ q + "  " + result[p,q].ToString() + "    ";
+                            
+                        }
+                        djf += Environment.NewLine;
+                    }
+                    System.IO.File.WriteAllText(@"g.txt", djf);
+                }
             }
         }
 
@@ -382,52 +411,6 @@ namespace Example
         }
 
         #region extra
-        /*PCA
-        private Image<Gray, float> CalculatePCAofImage(Image<Gray, byte> TestIm, int WindowSize)
-        {
-            int sX = TestIm.Width;
-            int sY = TestIm.Height;
-            int i, j;
-            Image<Gray, float> ImageFlo = TestIm.Convert<Gray, float>();
-            Matrix<float> Window = new Matrix<float>(WindowSize, WindowSize);
-            Matrix<float> Avg = new Matrix<float>(1, WindowSize);
-            Matrix<float> EigVals = new Matrix<float>(1, WindowSize);
-            Matrix<float> EigVects = new Matrix<float>(WindowSize, WindowSize);
-            Matrix<float> PCAFeatures = new Matrix<float>(WindowSize, WindowSize);
-            Image<Gray, float> TempIm = ImageFlo.CopyBlank();
-
-
-
-            for (i = 0; i < (sX - WindowSize); i++)
-            {
-                for (j = 0; j < (sY - WindowSize); j++)
-                {
-                    CvInvoke.cvSetImageROI(ImageFlo, new Rectangle(new Point(i, j), new Size(WindowSize, WindowSize)));
-                    CvInvoke.cvSetImageROI(TempIm, new Rectangle(new Point(i, j), new Size(WindowSize, WindowSize)));
-                    CvInvoke.cvConvert(ImageFlo, Window);
-                    CvInvoke.cvCalcPCA(Window, Avg, EigVals, EigVects, Emgu.CV.CvEnum.PCA_TYPE.CV_PCA_DATA_AS_ROW);
-                    try
-                    {
-                        CvInvoke.cvProjectPCA(Window, Avg, EigVects, PCAFeatures);
-                    }
-                    catch (Exception e)
-                    {
-                        throw (e);
-                    }
-                    CvInvoke.cvConvert(PCAFeatures, TempIm);
-
-                    CvInvoke.cvResetImageROI(ImageFlo);
-                    CvInvoke.cvResetImageROI(TempIm);
-
-
-                }
-            }
-
-            pictureBox1.Image = TempIm.Bitmap;
-            return (TempIm);
-
-        }*/
-
         /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
          {
              throw new NotImplementedException();
@@ -476,3 +459,5 @@ namespace Example
 
     }
 }
+
+
