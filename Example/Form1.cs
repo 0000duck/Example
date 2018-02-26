@@ -13,6 +13,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Cuda;
 using System.IO.MemoryMappedFiles;
+using Emgu.CV.ML;
 
 
 namespace Example
@@ -160,27 +161,32 @@ namespace Example
 
             //Actual video is played in pictureBox1
             Image<Bgr, Byte> imageInput = inputMat.ToImage<Bgr, Byte>();
-            pictureBox1.Image = imageInput.ToBitmap();
-            
-            
-            //Skin area detection
-            skinAreaDetection(inputMat.Bitmap);
-            pictureBox2.Image = inputMat.Bitmap;  //Face un-eliminated image
+            pictureBox1.Image = imageInput.Bitmap;
+
 
             //Face elimination
             imageInput = inputMat.ToImage<Bgr, Byte>();
             Image<Gray, byte> grayframe = imageInput.Convert<Gray, byte>();
             CascadeClassifier face = new CascadeClassifier("C:\\Emgu\\emgucv-windesktop 3.3.0.2824\\opencv\\data\\haarcascades\\haarcascade_frontalface_default.xml");
-            var faces = face.DetectMultiScale(grayframe, 1.1, 22, new Size(10, 10));
+            var faces = face.DetectMultiScale(grayframe, 1.1, 25, new Size(10, 10));
             foreach (var f in faces)
             {
                 Rectangle faceRectangle = Rectangle.Inflate(f, 40, 40);
                 imageInput.Draw(faceRectangle, new Bgr(Color.Black), -1);
             }
-            imageBox1.Image = imageInput; //Face elimination
+            Mat faceEliminationMat = imageInput.Mat;
+            Image<Bgr, Byte> faceElimination = faceEliminationMat.ToImage<Bgr, Byte>();
+            pictureBox2.Image = faceElimination.Bitmap; //Face elimination
+
+
+            //Skin area detection
+            
+            skinAreaDetection(imageInput.Bitmap);
+            imageBox1.Image = imageInput;
+
 
             Image<Bgr, Byte> imageMedianBlurForExtraction = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 15);
+            CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 7);
             imageBox2.Image = imageMedianBlurForExtraction; //Noise Removing
             Image<Bgr, Byte> real = resize(imageMedianBlurForExtraction);
             frameName = "gesture\\" + frameNumber + ".jpeg";
@@ -189,17 +195,16 @@ namespace Example
             //MedianBlur for KeySize(imageMedianBlur.Width, imageMedianBlur.Height) Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
             CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
-            imageBox2.Image = imageMedianBlur; //Noise Removing
-
             
+
             
             return imageMedianBlur;
         }
 
         private async void moduleFeatureExtraction(int mid)
         {
-            double[,] RawData = new double[10, 3780];
-            for (int k = (mid-5) ; k< (mid + 5); k++)
+            double[,] RawData = new double[16, 3780];
+            for (int k = (mid-8) ; k< (mid + 8); k++)
             {
                 string frameName = "gesture//" + k + ".jpeg";
                 Image<Bgr, byte > wow = new Image<Bgr, byte>(frameName);
@@ -209,26 +214,29 @@ namespace Example
                 float[] desc = new float[3780];
                 desc = GetVector(wow);
 
-                int i = k - (mid - 5);
+                int i = k - (mid - 8);
                 for (int j = 0; j < 3780; j++)
                     {
                         double val = Convert.ToDouble(desc[j]);
                         RawData.SetValue(val, i, j);
                     }
 
-                if (k == (mid + 4))
+                if (k == (mid + 7))
                 {
                     Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
                     Matrix<Double> Mean = new Matrix<Double>(1, 3780);
                     Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
                     Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
-                    CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 10);
-                    Matrix<Double> result = new Matrix<Double>(10, 10);
+                    CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 16);
+                    Matrix<Double> result = new Matrix<Double>(16, 16);
                     CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
                     string djf = null;
-                    for(int p = 0; p < 10; p++)
+                    djf = System.IO.File.ReadAllText(@"g.txt");
+                    djf += Environment.NewLine;
+                    djf += Environment.NewLine;
+                    for (int p = 0; p < 16; p++)
                     {
-                        for (int q = 0; q < 10; q++)
+                        for (int q = 0; q < 16; q++)
                         {
                             djf += p + " , "+ q + "  " + result[p,q].ToString() + "    ";
                             
