@@ -36,7 +36,7 @@ namespace Example
         Boolean Pause = false;
         Boolean captureProcess = false;
         Boolean isFirst = false;
-        Boolean isLast = false;
+        Boolean isLast = true;
         Matrix<float> response = new Matrix<float>(16, 26);
         
         #endregion
@@ -165,7 +165,7 @@ namespace Example
                     last = frameNumber;
                     label3.Text = "First: " + first + " Last: " + last;
                     int mid = (first + last) / 2;
-                    moduleFeatureExtraction(mid);
+                    moduleFeatureExtraction(first, last);
                     isFirst = false;
                 }
             }
@@ -217,10 +217,18 @@ namespace Example
             return imageMedianBlur;
         }
 
-        private async void moduleFeatureExtraction(int mid)
+        private async void moduleFeatureExtraction(int first,int last)
         {
             double[,] RawData = new double[16, 3780];
-            for (int k = (mid-8) ; k< (mid + 8); k++)
+            int mid = (first + last) / 2;
+            int low = mid - 8; ;
+            int high = mid + 8;
+            if (low < first)
+                low++;
+            if (high > last)
+                low++;
+            int length = high - low;
+            for (int k = (low) ; k< (high); k++)
             {
                 string frameName = "gesture//" + k + ".jpeg";
                 Image<Bgr, byte > wow = new Image<Bgr, byte>(frameName);
@@ -230,14 +238,14 @@ namespace Example
                 float[] desc = new float[3780];
                 desc = GetVector(wow);
 
-                int i = k - (mid - 8);
+                int i = k - (low);
                 for (int j = 0; j < 3780; j++)
                     {
                         double val = Convert.ToDouble(desc[j]);
                         RawData.SetValue(val, i, j);
                     }
 
-                if (k == (mid + 7))
+                if (k == (high-1))
                 {
                     Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
                     Matrix<Double> Mean = new Matrix<Double>(1, 3780);
