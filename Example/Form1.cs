@@ -14,7 +14,10 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Cuda;
 using System.IO.MemoryMappedFiles;
 using Emgu.CV.ML;
-
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml;
+using Emgu.CV.ML.MlEnum;
 
 namespace Example
 {
@@ -22,6 +25,7 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
+        char[] array = new char[11];
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
@@ -33,11 +37,23 @@ namespace Example
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = false;
+        Matrix<float> response = new Matrix<float>(16, 26);
+        
         #endregion
 
         public Form1()
         {
             InitializeComponent();
+            for(int i= 0; i < 16; i++)
+            {
+                for (int j = 0; j < 26; j++)
+                {
+                    if (j == 7)
+                        response[i, j] = 1;
+                    if (j != 7)
+                        response[i, j] = 0;
+                }
+            }
         }
 
         public bool skinAreaDetection(Bitmap b)
@@ -230,6 +246,17 @@ namespace Example
                     CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 16);
                     Matrix<Double> result = new Matrix<Double>(16, 16);
                     CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
+                    
+                    
+                    String filePath = @"test.xml";
+                    StringBuilder sb = new StringBuilder();
+                    (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
+                    XmlDocument xDoc = new XmlDocument();
+                    xDoc.LoadXml(sb.ToString());
+
+                    System.IO.File.WriteAllText(filePath, sb.ToString());
+                    Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
+
                     string djf = null;
                     djf = System.IO.File.ReadAllText(@"g.txt");
                     djf += Environment.NewLine;
@@ -238,12 +265,33 @@ namespace Example
                     {
                         for (int q = 0; q < 16; q++)
                         {
-                            djf += p + " , "+ q + "  " + result[p,q].ToString() + "    ";
-                            
+                            djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
                         }
                         djf += Environment.NewLine;
                     }
-                    System.IO.File.WriteAllText(@"g.txt", djf);
+                    Matrix<float> masjhdb = result.Convert<float>();
+                    TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
+                    int features = 16;
+                    int classes = 26;
+                    Matrix<int> layers = new Matrix<int>(4, 1);
+                    layers[0, 0] = features;
+                    layers[1, 0] = classes * 4 ;
+                    layers[2, 0] = classes * 2;
+                    layers[3, 0] = classes;
+                    ANN_MLP ann = new ANN_MLP();
+                    ann.SetLayerSizes(layers);
+                    ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
+                    ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Rprop, 0, 0);
+                    ann.Train(trainData);
+                    ann.Save(@"abc");
+                    
+                    Matrix<float> hehe = new Matrix<float>(1 , 16);
+                    for (int q = 0; q < 16; q++)
+                    {
+                        hehe[0, q] = masjhdb[2, q];
+                    }
+                    float real = ann.Predict(hehe);
+                    System.IO.File.WriteAllText(@"g.txt", real.ToString());
                 }
             }
         }
@@ -378,12 +426,9 @@ namespace Example
         void ProcessFunction(object sender, EventArgs e)
         {
             int frameNumber = 2000;
-
-            if (!capture.QueryFrame().IsEmpty) { }
-                
+            Mat matInput = capture.QueryFrame();
             if (!capture.QueryFrame().IsEmpty)
-            {
-                Mat matInput = capture.QueryFrame();
+            { 
                 float[] smoothgrad = new float[(int)frameNumber];
                 if (!matInput.IsEmpty)
                 {
@@ -467,5 +512,3 @@ namespace Example
 
     }
 }
-
-
