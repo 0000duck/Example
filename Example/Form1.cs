@@ -25,7 +25,8 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
-        char[] array = new char[11];
+        int adasas = 1;
+        char[] array = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
@@ -44,16 +45,7 @@ namespace Example
         public Form1()
         {
             InitializeComponent();
-            for(int i= 0; i < 16; i++)
-            {
-                for (int j = 0; j < 26; j++)
-                {
-                    if (j == 7)
-                        response[i, j] = 1;
-                    if (j != 7)
-                        response[i, j] = 0;
-                }
-            }
+            
         }
 
         public bool skinAreaDetection(Bitmap b)
@@ -219,10 +211,22 @@ namespace Example
 
         private async void moduleFeatureExtraction(int first,int last)
         {
+            string fghfh = adasas.ToString() + "  ";
             double[,] RawData = new double[16, 3780];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
             int high = mid + 8;
+            for (int i = 0; i < 16; i++)
+            {
+                for (int j = 0; j < 26; j++)
+                {
+                    if (j == adasas)
+                        response[i, j] = 1;
+                    if (j != adasas)
+                        response[i, j] = 0;
+                }
+            }
+            adasas++;
             if (low < first)
                 low++;
             if (high > last)
@@ -278,7 +282,7 @@ namespace Example
                         djf += Environment.NewLine;
                     }
                     Matrix<float> masjhdb = result.Convert<float>();
-                    TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
+                    //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
                     int features = 16;
                     int classes = 26;
                     Matrix<int> layers = new Matrix<int>(4, 1);
@@ -287,18 +291,23 @@ namespace Example
                     layers[2, 0] = classes * 2;
                     layers[3, 0] = classes;
                     ANN_MLP ann = new ANN_MLP();
+                    FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
+                    ann.Read(fileStorageRead.GetRoot(0));
                     ann.SetLayerSizes(layers);
                     ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
                     ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Rprop, 0, 0);
-                    ann.Train(trainData);
-                    ann.Save(@"abc");
+                    ann.Train(masjhdb, DataLayoutType.RowSample, response);
+                    FileStorage fileStorageWrite = new FileStorage(@"abc.xml",FileStorage.Mode.Write);
+                    ann.Write(fileStorageWrite);
                     
                     Matrix<float> hehe = new Matrix<float>(1 , 16);
                     for (int q = 0; q < 16; q++)
                     {
-                        hehe[0, q] = masjhdb[2, q];
+                        hehe[0, q] = masjhdb[6, q];
                     }
                     float real = ann.Predict(hehe);
+                    fghfh += array[(int)real];
+                    label5.Text = fghfh.ToString();
                     System.IO.File.WriteAllText(@"g.txt", real.ToString());
                 }
             }
