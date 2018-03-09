@@ -25,7 +25,7 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
-        int adasas = 1;
+        int adasas = 0;
         char[] array = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
         Image<Bgr, byte> _imgInput;
@@ -38,7 +38,7 @@ namespace Example
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = true;
-        Matrix<float> response = new Matrix<float>(16, 26);
+        Matrix<float> response = new Matrix<float>(16, 26) {};
         
         #endregion
 
@@ -211,7 +211,7 @@ namespace Example
 
         private async void moduleFeatureExtraction(int first,int last)
         {
-            string fghfh = adasas.ToString() + "  ";
+            string fghfh = adasas.ToString() + "    ";
             double[,] RawData = new double[16, 3780];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
@@ -235,12 +235,12 @@ namespace Example
             for (int k = (low) ; k< (high); k++)
             {
                 string frameName = "gesture//" + k + ".jpeg";
-                Image<Bgr, byte > wow = new Image<Bgr, byte>(frameName);
-                pictureBox3.Image = wow.Bitmap;
+                Image<Bgr, byte > featurExtractionInput = new Image<Bgr, byte>(frameName);
+                pictureBox3.Image = featurExtractionInput.Bitmap;
                 label4.Text = k.ToString();
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
-                desc = GetVector(wow);
+                desc = GetVector(featurExtractionInput);
 
                 int i = k - (low);
                 for (int j = 0; j < 3780; j++)
@@ -282,30 +282,30 @@ namespace Example
                         djf += Environment.NewLine;
                     }
                     Matrix<float> masjhdb = result.Convert<float>();
-                    //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
+                    TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
                     int features = 16;
                     int classes = 26;
                     Matrix<int> layers = new Matrix<int>(4, 1);
                     layers[0, 0] = features;
-                    layers[1, 0] = classes * 4 ;
+                    layers[1, 0] = classes * 4;
                     layers[2, 0] = classes * 2;
                     layers[3, 0] = classes;
                     ANN_MLP ann = new ANN_MLP();
                     FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
                     ann.Read(fileStorageRead.GetRoot(0));
-                    ann.SetLayerSizes(layers);
+                    /*ann.SetLayerSizes(layers);
                     ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
-                    ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Rprop, 0, 0);
-                    ann.Train(masjhdb, DataLayoutType.RowSample, response);
+                    ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
+                    ann.Train(masjhdb, DataLayoutType.RowSample, response);*/
                     FileStorage fileStorageWrite = new FileStorage(@"abc.xml",FileStorage.Mode.Write);
                     ann.Write(fileStorageWrite);
-                    
                     Matrix<float> hehe = new Matrix<float>(1 , 16);
                     for (int q = 0; q < 16; q++)
                     {
-                        hehe[0, q] = masjhdb[6, q];
+                        hehe[0, q] = masjhdb[11, q];
                     }
                     float real = ann.Predict(hehe);
+
                     fghfh += array[(int)real];
                     label5.Text = fghfh.ToString();
                     System.IO.File.WriteAllText(@"g.txt", real.ToString());
@@ -481,6 +481,27 @@ namespace Example
         }
 
         #region extra
+
+
+        /*SVM svm = new SVM();
+        FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
+        svm.Read(fileStorageRead.GetRoot(0));
+        svm.TrainAuto(trainData);
+
+                    FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
+        svm.Write(fileStorageWrite);
+                    Matrix<float> hehe = new Matrix<float>(1, 16);
+                    for (int q = 0; q< 16; q++)
+                    {
+                        hehe[0, q] = masjhdb[11, q];
+                    }
+    float real = svm.Predict(hehe);
+    
+
+
+    fghfh += array[(int)real];
+
+        */
         /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
          {
              throw new NotImplementedException();
