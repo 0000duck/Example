@@ -285,18 +285,20 @@ namespace Example
                     TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
                     int features = 16;
                     int classes = 26;
-                    Matrix<int> layers = new Matrix<int>(4, 1);
+                    Matrix<int> layers = new Matrix<int>(6, 1);
                     layers[0, 0] = features;
-                    layers[1, 0] = classes * 4;
-                    layers[2, 0] = classes * 2;
-                    layers[3, 0] = classes;
+                    layers[1, 0] = classes * 16;
+                    layers[2, 0] = classes * 8;
+                    layers[3, 0] = classes * 4;
+                    layers[4, 0] = classes * 2;
+                    layers[5, 0] = classes;
                     ANN_MLP ann = new ANN_MLP();
                     FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
                     ann.Read(fileStorageRead.GetRoot(0));
-                    /*ann.SetLayerSizes(layers);
+                    ann.SetLayerSizes(layers);
                     ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
                     ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
-                    ann.Train(masjhdb, DataLayoutType.RowSample, response);*/
+                    ann.Train(masjhdb, DataLayoutType.RowSample, response);
                     FileStorage fileStorageWrite = new FileStorage(@"abc.xml",FileStorage.Mode.Write);
                     ann.Write(fileStorageWrite);
                     Matrix<float> hehe = new Matrix<float>(1 , 16);
