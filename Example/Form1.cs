@@ -136,7 +136,7 @@ namespace Example
             //Image box2 image of gradient
             imageBox3.Image = magnitude;
             //FrameNumber Display
-            label2.Text = frameNumber.ToString();
+            label2.Text = "Frame Count = " + frameNumber.ToString();
             double avg = magnitude.GetAverage().Intensity;
             //Chart of gradient
             chart1.Series["Gradient"].Points.AddXY(frameNumber, avg);
@@ -211,7 +211,7 @@ namespace Example
 
         private async void moduleFeatureExtraction(int first,int last)
         {
-            string fghfh = adasas.ToString() + "    ";
+            string fghfh = "";
             double[,] RawData = new double[16, 3780];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
@@ -237,7 +237,6 @@ namespace Example
                 string frameName = "gesture//" + k + ".jpeg";
                 Image<Bgr, byte > featurExtractionInput = new Image<Bgr, byte>(frameName);
                 pictureBox3.Image = featurExtractionInput.Bitmap;
-                label4.Text = k.ToString();
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
                 desc = GetVector(featurExtractionInput);
@@ -282,7 +281,7 @@ namespace Example
                         djf += Environment.NewLine;
                     }
                     Matrix<float> masjhdb = result.Convert<float>();
-                    TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
+                    //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
                     int features = 16;
                     int classes = 26;
                     Matrix<int> layers = new Matrix<int>(6, 1);
@@ -304,7 +303,7 @@ namespace Example
                     Matrix<float> hehe = new Matrix<float>(1 , 16);
                     for (int q = 0; q < 16; q++)
                     {
-                        hehe[0, q] = masjhdb[11, q];
+                        hehe[0, q] = masjhdb[6, q];
                     }
                     float real = ann.Predict(hehe);
 
@@ -327,7 +326,7 @@ namespace Example
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                frameNumber = 0;
+                frameNumber = 1;
                 capture = new VideoCapture(ofd.FileName);
                 capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameHeight, 240);
                 capture.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameWidth, 320);
@@ -549,6 +548,6 @@ namespace Example
            // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
         }*/
         #endregion
-
+            
     }
 }
