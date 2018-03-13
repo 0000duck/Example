@@ -18,6 +18,10 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Xml;
 using Emgu.CV.ML.MlEnum;
+using System.Speech;
+using System.Speech.Synthesis;
+
+
 
 namespace Example
 {
@@ -25,6 +29,7 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
+        
         int adasas = 0;
         char[] array = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
@@ -548,6 +553,21 @@ namespace Example
            // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
         }*/
         #endregion
-            
+        SpeechSynthesizer reader = new SpeechSynthesizer();
+       
+
+        private void speechToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            if (label5.Text != " ")
+            {
+                reader.Dispose();
+                reader = new SpeechSynthesizer();
+                reader.SpeakAsync(label5.Text);
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+        }
     }
 }

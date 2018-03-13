@@ -62,6 +62,7 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.speechToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -80,7 +81,8 @@
             this.pauseToolStripMenuItem,
             this.skinDetectionToolStripMenuItem,
             this.sobelToolStripMenuItem,
-            this.exitToolStripMenuItem});
+            this.exitToolStripMenuItem,
+            this.speechToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1366, 24);
@@ -185,7 +187,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(343, 9);
+            this.label1.Location = new System.Drawing.Point(743, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 15);
             this.label1.TabIndex = 4;
@@ -353,7 +355,13 @@
             this.label4.Size = new System.Drawing.Size(58, 20);
             this.label4.TabIndex = 18;
             this.label4.Text = "Output";
-
+            // 
+            // speechToolStripMenuItem
+            // 
+            this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
+            this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.speechToolStripMenuItem.Text = "Speech";
+            this.speechToolStripMenuItem.Click += new System.EventHandler(this.speechToolStripMenuItem_Click_1);
             // 
             // Form1
             // 
@@ -428,6 +436,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ToolStripMenuItem speechToolStripMenuItem;
     }
 }
 
