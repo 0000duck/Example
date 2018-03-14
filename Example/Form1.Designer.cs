@@ -361,7 +361,6 @@
             this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
             this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
             this.speechToolStripMenuItem.Text = "Speech";
-            this.speechToolStripMenuItem.Click += new System.EventHandler(this.speechToolStripMenuItem_Click_1);
             // 
             // Form1
             // 

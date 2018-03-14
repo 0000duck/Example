@@ -313,6 +313,19 @@ namespace Example
                     float real = ann.Predict(hehe);
 
                     fghfh += array[(int)real];
+                    SpeechSynthesizer reader = new SpeechSynthesizer();
+
+
+                    if (label5.Text != " ")
+                    {
+                        reader.Dispose();
+                        reader = new SpeechSynthesizer();
+                        reader.SpeakAsync(fghfh.ToString());
+                    }
+                    else
+                    {
+                    MessageBox.Show("No Text Present!");
+                    }
                     label5.Text = fghfh.ToString();
                     System.IO.File.WriteAllText(@"g.txt", real.ToString());
                 }
@@ -485,7 +498,7 @@ namespace Example
                 this.Close();
             }
         }
-
+       
         #region extra
 
 
@@ -553,21 +566,6 @@ namespace Example
            // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
         }*/
         #endregion
-        SpeechSynthesizer reader = new SpeechSynthesizer();
-       
 
-        private void speechToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            if (label5.Text != " ")
-            {
-                reader.Dispose();
-                reader = new SpeechSynthesizer();
-                reader.SpeakAsync(label5.Text);
-            }
-            else
-            {
-                MessageBox.Show("No Text Present!");
-            }
-        }
     }
 }
