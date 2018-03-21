@@ -44,6 +44,7 @@
             this.skinDetectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sobelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.speechToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -62,7 +63,6 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.speechToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -102,14 +102,15 @@
             // openVideoToolStripMenuItem
             // 
             this.openVideoToolStripMenuItem.Name = "openVideoToolStripMenuItem";
-            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.openVideoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openVideoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openVideoToolStripMenuItem.Text = "OpenVideo";
             this.openVideoToolStripMenuItem.Click += new System.EventHandler(this.openVideoToolStripMenuItem_Click);
             // 
             // openImageToolStripMenuItem
             // 
             this.openImageToolStripMenuItem.Name = "openImageToolStripMenuItem";
-            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.openImageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openImageToolStripMenuItem.Text = "OpenImage";
             this.openImageToolStripMenuItem.Click += new System.EventHandler(this.openImageToolStripMenuItem_Click);
             // 
@@ -118,7 +119,7 @@
             this.cameraInputToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.playPauseToolStripMenuItem});
             this.cameraInputToolStripMenuItem.Name = "cameraInputToolStripMenuItem";
-            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.cameraInputToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.cameraInputToolStripMenuItem.Text = "CameraInput";
             this.cameraInputToolStripMenuItem.Click += new System.EventHandler(this.cameraInputToolStripMenuItem_Click);
             // 
@@ -163,6 +164,13 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // speechToolStripMenuItem
+            // 
+            this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
+            this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.speechToolStripMenuItem.Text = "Speech";
+            this.speechToolStripMenuItem.Click += new System.EventHandler(this.speechToolStripMenuItem_Click);
             // 
             // pictureBox1
             // 
@@ -355,12 +363,6 @@
             this.label4.Size = new System.Drawing.Size(58, 20);
             this.label4.TabIndex = 18;
             this.label4.Text = "Output";
-            // 
-            // speechToolStripMenuItem
-            // 
-            this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
-            this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
-            this.speechToolStripMenuItem.Text = "Speech";
             // 
             // Form1
             // 

@@ -22,7 +22,6 @@ using System.Speech;
 using System.Speech.Synthesis;
 
 
-
 namespace Example
 {
     public partial class Form1 : Form
@@ -30,7 +29,7 @@ namespace Example
         #region declaration
         VideoWriter VideoW;
         
-        int adasas = 0;
+        int indexOfResponse = 0;
         char[] array = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
         Image<Bgr, byte> _imgInput;
@@ -103,7 +102,6 @@ namespace Example
                     capture.Read(matInput);
                     if (!matInput.IsEmpty)
                     {
-                        
                         moduleKeyFrameExtraction(matInput);
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
@@ -208,9 +206,6 @@ namespace Example
             //MedianBlur for KeySize(imageMedianBlur.Width, imageMedianBlur.Height) Frame Extraction
             Image<Bgr, Byte> imageMedianBlur = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
             CvInvoke.MedianBlur(imageInput, imageMedianBlur, 21);
-            
-
-            
             return imageMedianBlur;
         }
 
@@ -225,22 +220,23 @@ namespace Example
             {
                 for (int j = 0; j < 26; j++)
                 {
-                    if (j == adasas)
+                    if (j == indexOfResponse)
                         response[i, j] = 1;
-                    if (j != adasas)
+                    if (j != indexOfResponse)
                         response[i, j] = 0;
                 }
             }
-            adasas++;
+            indexOfResponse++;
             if (low < first)
                 low++;
             if (high > last)
                 low++;
             int length = high - low;
-            for (int k = (low) ; k< (high); k++)
+            int k;
+            for (k = (low); k < (high); k++)
             {
                 string frameName = "gesture//" + k + ".jpeg";
-                Image<Bgr, byte > featurExtractionInput = new Image<Bgr, byte>(frameName);
+                Image<Bgr, byte> featurExtractionInput = new Image<Bgr, byte>(frameName);
                 pictureBox3.Image = featurExtractionInput.Bitmap;
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
@@ -248,88 +244,93 @@ namespace Example
 
                 int i = k - (low);
                 for (int j = 0; j < 3780; j++)
-                    {
-                        double val = Convert.ToDouble(desc[j]);
-                        RawData.SetValue(val, i, j);
-                    }
-
-                if (k == (high-1))
                 {
-                    Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
-                    Matrix<Double> Mean = new Matrix<Double>(1, 3780);
-                    Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
-                    Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
-                    CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 16);
-                    Matrix<Double> result = new Matrix<Double>(16, 16);
-                    CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
-                    
-                    
-                    String filePath = @"test.xml";
-                    StringBuilder sb = new StringBuilder();
-                    (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
-                    XmlDocument xDoc = new XmlDocument();
-                    xDoc.LoadXml(sb.ToString());
-
-                    System.IO.File.WriteAllText(filePath, sb.ToString());
-                    Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
-
-                    string djf = null;
-                    djf = System.IO.File.ReadAllText(@"g.txt");
-                    djf += Environment.NewLine;
-                    djf += Environment.NewLine;
-                    for (int p = 0; p < 16; p++)
-                    {
-                        for (int q = 0; q < 16; q++)
-                        {
-                            djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
-                        }
-                        djf += Environment.NewLine;
-                    }
-                    Matrix<float> masjhdb = result.Convert<float>();
-                    //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
-                    int features = 16;
-                    int classes = 26;
-                    Matrix<int> layers = new Matrix<int>(6, 1);
-                    layers[0, 0] = features;
-                    layers[1, 0] = classes * 16;
-                    layers[2, 0] = classes * 8;
-                    layers[3, 0] = classes * 4;
-                    layers[4, 0] = classes * 2;
-                    layers[5, 0] = classes;
-                    ANN_MLP ann = new ANN_MLP();
-                    FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
-                    ann.Read(fileStorageRead.GetRoot(0));
-                    ann.SetLayerSizes(layers);
-                    ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
-                    ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
-                    ann.Train(masjhdb, DataLayoutType.RowSample, response);
-                    FileStorage fileStorageWrite = new FileStorage(@"abc.xml",FileStorage.Mode.Write);
-                    ann.Write(fileStorageWrite);
-                    Matrix<float> hehe = new Matrix<float>(1 , 16);
-                    for (int q = 0; q < 16; q++)
-                    {
-                        hehe[0, q] = masjhdb[6, q];
-                    }
-                    float real = ann.Predict(hehe);
-
-                    fghfh += array[(int)real];
-                    SpeechSynthesizer reader = new SpeechSynthesizer();
-
-
-                    if (label5.Text != " ")
-                    {
-                        reader.Dispose();
-                        reader = new SpeechSynthesizer();
-                        reader.SpeakAsync(fghfh.ToString());
-                    }
-                    else
-                    {
-                    MessageBox.Show("No Text Present!");
-                    }
-                    label5.Text = fghfh.ToString();
-                    System.IO.File.WriteAllText(@"g.txt", real.ToString());
+                    double val = Convert.ToDouble(desc[j]);
+                    RawData.SetValue(val, i, j);
                 }
             }
+            if (k == high)
+            {
+                Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
+                Matrix<Double> Mean = new Matrix<Double>(1, 3780);
+                Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
+                Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
+                CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 100);
+                Matrix<Double> result = new Matrix<Double>(16, 100);
+                CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
+
+
+               /* String filePath = @"test.xml";
+                StringBuilder sb = new StringBuilder();
+                (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.LoadXml(sb.ToString());
+
+                System.IO.File.WriteAllText(filePath, sb.ToString());
+                Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
+
+                string djf = null;
+                djf = System.IO.File.ReadAllText(@"g.txt");
+                djf += Environment.NewLine;
+                djf += Environment.NewLine;
+                for (int p = 0; p < 16; p++)
+                {
+                    for (int q = 0; q < 100; q++)
+                    {
+                        djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
+                    }
+                    djf += Environment.NewLine;
+                }*/
+                Matrix<float> masjhdb = result.Convert<float>();
+                //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
+                int features = 100;
+                int classes = 26;
+                Matrix<int> layers = new Matrix<int>(6, 1);
+                layers[0, 0] = features;
+                layers[1, 0] = classes * 16;
+                layers[2, 0] = classes * 8;
+                layers[3, 0] = classes * 4;
+                layers[4, 0] = classes * 2;
+                layers[5, 0] = classes;
+                //ANN_MLP ann = new ANN_MLP();
+                SVM svm = new SVM();
+                //FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
+                //ann.Read(fileStorageRead.GetRoot(0));
+                //svm.Read(fileStorageRead.GetRoot(0));
+                //ann.SetLayerSizes(layers);
+                //ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
+                //ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
+                //ann.Train(masjhdb, DataLayoutType.RowSample, response);
+                svm.Train(masjhdb, DataLayoutType.RowSample, response);
+                //ann.Save(@"abc.xml");
+                FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
+                svm.Write(fileStorageWrite);
+                Matrix<float> hehe = new Matrix<float>(1, 100);
+                for (int q = 0; q < 100; q++)
+                {
+                    hehe[0, q] = masjhdb[6, q];
+                }
+                float real = svm.Predict(hehe);
+
+                fghfh += array[(int)real];
+                label5.Text = fghfh.ToString();
+                SpeechSynthesizer reader1 = new SpeechSynthesizer();
+
+
+                if (label5.Text != " ")
+                {
+                    reader1.Dispose();
+                    reader1 = new SpeechSynthesizer();
+                    reader1.SpeakAsync(fghfh.ToString());
+                }
+                else
+                {
+                    MessageBox.Show("No Text Present!");
+                }
+
+                System.IO.File.WriteAllText(@"g.txt", real.ToString());
+            }
+
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -433,7 +434,6 @@ namespace Example
                 fra = "Frame Number: " + i + " Value " + desc.GetValue(i).ToString() + Environment.NewLine;
                 System.IO.File.WriteAllText(@"des.txt", fra);
             }*/
-
         }
 
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
@@ -456,7 +456,6 @@ namespace Example
             }
             Application.Idle += new EventHandler(ProcessFunction);
             captureProcess = true;
-
         }
 
         void ProcessFunction(object sender, EventArgs e)
@@ -470,8 +469,6 @@ namespace Example
                 {
                     moduleKeyFrameExtraction(matInput);
                 }
-
-                
             }
         }
 
@@ -498,7 +495,7 @@ namespace Example
                 this.Close();
             }
         }
-       
+
         #region extra
 
 
@@ -567,5 +564,22 @@ namespace Example
         }*/
         #endregion
 
+        private void speechToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SpeechSynthesizer reader = new SpeechSynthesizer();
+
+
+            if (label5.Text != " ")
+            {
+                reader.Dispose();
+                reader = new SpeechSynthesizer();
+                reader.SpeakAsync(label5.Text);
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+
+        }
     }
 }
