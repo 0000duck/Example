@@ -31,7 +31,10 @@ namespace Example
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = true;
+        Matrix<float> featureOfSample = new Matrix<float>(16, 16) { };
         Matrix<float> allFeatureOfSample = new Matrix<float>(416, 16) {};
+        Matrix<int> svmResponse = new Matrix<int>(16, 1) { };
+        Matrix<int> annResponse = new Matrix<int>(16, 26) { };
         Matrix<int> svmAllResponse = new Matrix<int>(416, 1) {};
         Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
         string svmData = "";
@@ -210,14 +213,14 @@ namespace Example
             int high = mid + 8;
 
             //svmResponse generation
-            Matrix<int> svmResponse = new Matrix<int>(16, 1) { };
+            
             for (int i = 0, j = 0; i < 16; i++)
             {
                 svmResponse[i, j] = indexOfResponse;
             }
 
             //annResponse generation
-            Matrix<int> annResponse = new Matrix<int>(16, 26) { };
+            
             for (int i = 0; i < 16; i++)
             {
                 for (int j = 0; j < 26; j++)
@@ -264,7 +267,7 @@ namespace Example
 
                 
                 
-                Matrix<float> featureOfSample = result.Convert<float>();
+                featureOfSample = result.Convert<float>();
                 for(int p=0; p<16; p++)
                 {
                     svmData += "Response:   " + svmResponse[p, 0].ToString() + "   Feature:    ";
@@ -292,7 +295,96 @@ namespace Example
                 System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmData);
                 System.IO.File.WriteAllText(@"ANNTrainingData.txt", annData);
                 indexOfResponse++;
+                svmTraining();
+                annTraining();
             }
+        }
+
+        private void svmTraining()
+        {
+            string finalOutput = "";
+            TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
+            svm.SetKernel(Emgu.CV.ML.SVM.SvmKernelType.Linear);
+            svm.Type = Emgu.CV.ML.SVM.SvmType.CSvc;
+            svm.C = 1;
+            svm.TermCriteria = new MCvTermCriteria(100, 0.00001);
+            bool trained = svm.TrainAuto(SvmTrainData, 2);
+            //svm.Save("SVM_Model.xml");
+            //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
+            //svm.Write(fileStorageWrite);
+            Matrix<float> testSample = new Matrix<float>(1, 16);
+            for (int q = 0; q < 16; q++)
+            {
+                testSample[0, q] = allFeatureOfSample[12, q];
+            }
+            float real = svm.Predict(testSample);
+
+            finalOutput += labelArray[(int)real];
+            label5.Text = finalOutput.ToString();
+            SpeechSynthesizer reader1 = new SpeechSynthesizer();
+
+
+            if (label5.Text != " ")
+            {
+                reader1.Dispose();
+                reader1 = new SpeechSynthesizer();
+                reader1.SpeakAsync(finalOutput.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+
+            System.IO.File.WriteAllText(@"SVMResult.txt", real.ToString());
+        }
+
+        private void annTraining()
+        {
+            string finalOutput = "";
+            int features = 16;
+            int classes = 26;
+            Matrix<int> layers = new Matrix<int>(6, 1);
+            layers[0, 0] = features;
+            layers[1, 0] = classes * 16;
+            layers[2, 0] = classes * 8;
+            layers[3, 0] = classes * 4;
+            layers[4, 0] = classes * 2;
+            layers[5, 0] = classes;
+
+            FileStorage fileStorageRead = new FileStorage(@"ANN_Model.xml", FileStorage.Mode.Read);
+            ann.Read(fileStorageRead.GetRoot(0));
+            ann.SetLayerSizes(layers);
+            ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
+            ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
+            ann.Train(allFeatureOfSample, DataLayoutType.RowSample, annAllResponse);
+
+            FileStorage fileStorageWrite = new FileStorage(@"ANN_Model.xml", FileStorage.Mode.Write);
+            ann.Write(fileStorageWrite);
+
+            Matrix<float> testSample = new Matrix<float>(1, 16);
+            for (int q = 0; q < 16; q++)
+            {
+                testSample[0, q] = allFeatureOfSample[12, q];
+            }
+            float real = ann.Predict(testSample);
+
+            finalOutput += labelArray[(int)real];
+            label5.Text = finalOutput.ToString();
+            SpeechSynthesizer reader1 = new SpeechSynthesizer();
+
+
+            if (label5.Text != " ")
+            {
+                reader1.Dispose();
+                reader1 = new SpeechSynthesizer();
+                reader1.SpeakAsync(finalOutput.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+
+            System.IO.File.WriteAllText(@"ANNResult.txt", real.ToString());
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -435,84 +527,12 @@ namespace Example
 
         private void sVMTPToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string finalOutput = "";
-            svm.Train(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
-            //svm.Save(@"abc.xml");
-            //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
-            //svm.Write(fileStorageWrite);
-            Matrix<float> testSample = new Matrix<float>(1, 16);
-            for (int q = 0; q < 16; q++)
-            {
-                testSample[0, q] = allFeatureOfSample[36, q];
-            }
-            float real = svm.Predict(testSample);
-
-            finalOutput += labelArray[(int)real];
-            label5.Text = finalOutput.ToString();
-            SpeechSynthesizer reader1 = new SpeechSynthesizer();
-
-
-            if (label5.Text != " ")
-            {
-                reader1.Dispose();
-                reader1 = new SpeechSynthesizer();
-                reader1.SpeakAsync(finalOutput.ToString());
-            }
-            else
-            {
-                MessageBox.Show("No Text Present!");
-            }
-
-            System.IO.File.WriteAllText(@"SVMResult.txt", real.ToString());
+            svmTraining();
         }
 
         private void aNNTPToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string finalOutput = "";
-            int features = 16;
-            int classes = 26;
-            Matrix<int> layers = new Matrix<int>(6, 1);
-            layers[0, 0] = features;
-            layers[1, 0] = classes * 16;
-            layers[2, 0] = classes * 8;
-            layers[3, 0] = classes * 4;
-            layers[4, 0] = classes * 2;
-            layers[5, 0] = classes; 
-
-            //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
-            //ann.Read(fileStorageRead.GetRoot(0));
-            ann.SetLayerSizes(layers);
-            ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
-            ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
-            ann.Train(allFeatureOfSample, DataLayoutType.RowSample, annAllResponse);
-
-            FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
-            ann.Write(fileStorageWrite);
-
-            Matrix<float> testSample = new Matrix<float>(1, 16);
-            for (int q = 0; q< 16; q++)
-            {
-                testSample[0, q] = allFeatureOfSample[36, q];
-            }
-            float real = ann.Predict(testSample);
-
-            finalOutput += labelArray[(int)real];
-            label5.Text = finalOutput.ToString();
-            SpeechSynthesizer reader1 = new SpeechSynthesizer();
-
-
-            if (label5.Text != " ")
-            {
-                reader1.Dispose();
-                reader1 = new SpeechSynthesizer();
-                reader1.SpeakAsync(finalOutput.ToString());
-            }
-            else
-            {
-                MessageBox.Show("No Text Present!");
-            }
-
-            System.IO.File.WriteAllText(@"ANNResult.txt", real.ToString());
+            annTraining();
         }
 
         #region extra
