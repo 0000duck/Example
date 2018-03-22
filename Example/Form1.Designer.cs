@@ -41,10 +41,8 @@
             this.playPauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.skinDetectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sobelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.speechToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -63,6 +61,8 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.sVMTPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aNNTPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -79,10 +79,10 @@
             this.openToolStripMenuItem,
             this.playToolStripMenuItem,
             this.pauseToolStripMenuItem,
-            this.skinDetectionToolStripMenuItem,
-            this.sobelToolStripMenuItem,
-            this.exitToolStripMenuItem,
-            this.speechToolStripMenuItem});
+            this.sVMTPToolStripMenuItem,
+            this.aNNTPToolStripMenuItem,
+            this.speechToolStripMenuItem,
+            this.exitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1366, 24);
@@ -145,19 +145,12 @@
             this.pauseToolStripMenuItem.Text = "Pause";
             this.pauseToolStripMenuItem.Click += new System.EventHandler(this.pauseToolStripMenuItem_Click);
             // 
-            // skinDetectionToolStripMenuItem
+            // speechToolStripMenuItem
             // 
-            this.skinDetectionToolStripMenuItem.Name = "skinDetectionToolStripMenuItem";
-            this.skinDetectionToolStripMenuItem.Size = new System.Drawing.Size(92, 20);
-            this.skinDetectionToolStripMenuItem.Text = "SkinDetection";
-            this.skinDetectionToolStripMenuItem.Click += new System.EventHandler(this.skinDetectionToolStripMenuItem_Click);
-            // 
-            // sobelToolStripMenuItem
-            // 
-            this.sobelToolStripMenuItem.Name = "sobelToolStripMenuItem";
-            this.sobelToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
-            this.sobelToolStripMenuItem.Text = "Sobel";
-            this.sobelToolStripMenuItem.Click += new System.EventHandler(this.sobelToolStripMenuItem_Click);
+            this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
+            this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.speechToolStripMenuItem.Text = "Speech";
+            this.speechToolStripMenuItem.Click += new System.EventHandler(this.speechToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -165,13 +158,6 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // speechToolStripMenuItem
-            // 
-            this.speechToolStripMenuItem.Name = "speechToolStripMenuItem";
-            this.speechToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
-            this.speechToolStripMenuItem.Text = "Speech";
-            this.speechToolStripMenuItem.Click += new System.EventHandler(this.speechToolStripMenuItem_Click);
             // 
             // pictureBox1
             // 
@@ -196,7 +182,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(743, 9);
+            this.label1.Location = new System.Drawing.Point(866, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(127, 15);
             this.label1.TabIndex = 4;
@@ -227,7 +213,7 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(492, 9);
+            this.label2.Location = new System.Drawing.Point(520, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(101, 15);
             this.label2.TabIndex = 6;
@@ -258,7 +244,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(627, 9);
+            this.label3.Location = new System.Drawing.Point(672, 9);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(83, 15);
             this.label3.TabIndex = 8;
@@ -365,6 +351,20 @@
             this.label4.TabIndex = 18;
             this.label4.Text = "Output";
             // 
+            // sVMTPToolStripMenuItem
+            // 
+            this.sVMTPToolStripMenuItem.Name = "sVMTPToolStripMenuItem";
+            this.sVMTPToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+            this.sVMTPToolStripMenuItem.Text = "SVM_TP";
+            this.sVMTPToolStripMenuItem.Click += new System.EventHandler(this.sVMTPToolStripMenuItem_Click);
+            // 
+            // aNNTPToolStripMenuItem
+            // 
+            this.aNNTPToolStripMenuItem.Name = "aNNTPToolStripMenuItem";
+            this.aNNTPToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
+            this.aNNTPToolStripMenuItem.Text = "ANN_TP";
+            this.aNNTPToolStripMenuItem.Click += new System.EventHandler(this.aNNTPToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -420,8 +420,6 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openVideoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openImageToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem skinDetectionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sobelToolStripMenuItem;
         private Emgu.CV.UI.ImageBox imageBox2;
         private System.Windows.Forms.ToolStripMenuItem cameraInputToolStripMenuItem;
         private System.Windows.Forms.Label label2;
@@ -439,6 +437,8 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ToolStripMenuItem speechToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sVMTPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aNNTPToolStripMenuItem;
     }
 }
 

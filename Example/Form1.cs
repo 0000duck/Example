@@ -1,24 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Emgu.CV;
-using Emgu.CV.Util;
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Cuda;
-using System.IO.MemoryMappedFiles;
 using Emgu.CV.ML;
-using System.Xml.Serialization;
-using System.IO;
-using System.Xml;
 using Emgu.CV.ML.MlEnum;
-using System.Speech;
 using System.Speech.Synthesis;
 
 
@@ -28,9 +16,10 @@ namespace Example
     {
         #region declaration
         VideoWriter VideoW;
-        
+        SVM svm = new SVM();
+        ANN_MLP ann = new ANN_MLP();
         int indexOfResponse = 0;
-        char[] array = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
+        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
@@ -42,14 +31,17 @@ namespace Example
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = true;
-        Matrix<int> response = new Matrix<int>(16, 1) {};
-        
+        Matrix<float> allFeatureOfSample = new Matrix<float>(416, 16) {};
+        Matrix<int> svmAllResponse = new Matrix<int>(416, 1) {};
+        Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
+        string svmData = "";
+        string annData = "";
+
         #endregion
 
         public Form1()
         {
             InitializeComponent();
-            
         }
 
         public bool skinAreaDetection(Bitmap b)
@@ -211,17 +203,33 @@ namespace Example
 
         private async void moduleFeatureExtraction(int first,int last)
         {
-            string fghfh = "";
+            
             double[,] RawData = new double[16, 3780];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
             int high = mid + 8;
+
+            //svmResponse generation
+            Matrix<int> svmResponse = new Matrix<int>(16, 1) { };
+            for (int i = 0, j = 0; i < 16; i++)
+            {
+                svmResponse[i, j] = indexOfResponse;
+            }
+
+            //annResponse generation
+            Matrix<int> annResponse = new Matrix<int>(16, 26) { };
             for (int i = 0; i < 16; i++)
             {
-                int j = 0;
-                response[i, j] = indexOfResponse;
+                for (int j = 0; j < 26; j++)
+                {
+                    if (j == indexOfResponse)
+                        annResponse[i, j] = 1;
+                    if (j != indexOfResponse)
+                        annResponse[i, j] = 0;
+                }
+                
             }
-            indexOfResponse++;
+
             if (low < first)
                 low++;
             if (high > last)
@@ -251,81 +259,40 @@ namespace Example
                 Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
                 Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
                 CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 100);
-                Matrix<Double> result = new Matrix<Double>(16, 100);
+                Matrix<Double> result = new Matrix<Double>(16, 16);
                 CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
 
-
-               /* String filePath = @"test.xml";
-                StringBuilder sb = new StringBuilder();
-                (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
-                XmlDocument xDoc = new XmlDocument();
-                xDoc.LoadXml(sb.ToString());
-
-                System.IO.File.WriteAllText(filePath, sb.ToString());
-                Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
-
-                string djf = null;
-                djf = System.IO.File.ReadAllText(@"g.txt");
-                djf += Environment.NewLine;
-                djf += Environment.NewLine;
-                for (int p = 0; p < 16; p++)
+                
+                
+                Matrix<float> featureOfSample = result.Convert<float>();
+                for(int p=0; p<16; p++)
                 {
-                    for (int q = 0; q < 100; q++)
+                    svmData += "Response:   " + svmResponse[p, 0].ToString() + "   Feature:    ";
+                    //annData += "Response:   " + svmResponse[p, 0].ToString() + "   Feature:    ";
+                    svmAllResponse[(((indexOfResponse) * 16) + p), 0] = svmResponse[p, 0];
+
+
+                    annData += "Response:   ";
+                    for (int q = 0; q < 26; q++)
                     {
-                        djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
+                        annAllResponse[((indexOfResponse *16) + p), q] = annResponse[p, q];
+                        annData +=  annResponse[p, q].ToString() + ", ";
                     }
-                    djf += Environment.NewLine;
-                }*/
-                Matrix<float> masjhdb = result.Convert<float>();
-                //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
-                /*int features = 100;
-                int classes = 26;
-                Matrix<int> layers = new Matrix<int>(6, 1);
-                layers[0, 0] = features;
-                layers[1, 0] = classes * 16;
-                layers[2, 0] = classes * 8;
-                layers[3, 0] = classes * 4;
-                layers[4, 0] = classes * 2;
-                layers[5, 0] = classes;*/
-                //ANN_MLP ann = new ANN_MLP();
-                SVM svm = new SVM();
-                //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
-                //ann.Read(fileStorageRead.GetRoot(0));
-                //svm.Read(fileStorageRead.GetRoot(0));
-                //ann.SetLayerSizes(layers);
-                //ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
-                //ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
-                //ann.Train(masjhdb, DataLayoutType.RowSample, response);
-                svm.Train(masjhdb, DataLayoutType.RowSample, response);
-                svm.Save(@"abc.xml");
-                //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
-                //svm.Write(fileStorageWrite);
-                Matrix<float> hehe = new Matrix<float>(1, 100);
-                for (int q = 0; q < 100; q++)
-                {
-                    hehe[0, q] = masjhdb[6, q];
+                    annData += " Feature:    "; 
+
+                    for (int q = 0; q < 16; q++)
+                    {
+                        allFeatureOfSample[((indexOfResponse*16) + p), q] = featureOfSample[p, q];
+                        annData += featureOfSample[p, q].ToString() + ",  ";
+                        svmData += featureOfSample[p, q].ToString() + ",  ";
+                    }
+                    annData += Environment.NewLine;
+                    svmData += Environment.NewLine;
                 }
-                float real = svm.Predict(hehe);
-
-                fghfh += array[(int)real];
-                label5.Text = fghfh.ToString();
-                SpeechSynthesizer reader1 = new SpeechSynthesizer();
-
-
-                if (label5.Text != " ")
-                {
-                    reader1.Dispose();
-                    reader1 = new SpeechSynthesizer();
-                    reader1.SpeakAsync(fghfh.ToString());
-                }
-                else
-                {
-                    MessageBox.Show("No Text Present!");
-                }
-
-                System.IO.File.WriteAllText(@"g.txt", real.ToString());
+                System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmData);
+                System.IO.File.WriteAllText(@"ANNTrainingData.txt", annData);
+                indexOfResponse++;
             }
-
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -336,7 +303,10 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            System.IO.File.WriteAllText(@"g.txt", " ");
+            System.IO.File.WriteAllText(@"SVMTrainingData.txt", " ");
+            System.IO.File.WriteAllText(@"ANNTrainingData.txt", " ");
+            System.IO.File.WriteAllText(@"SVMResult.txt", " ");
+            System.IO.File.WriteAllText(@"ANNResult.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -359,6 +329,8 @@ namespace Example
                 _imgInput = new Image<Bgr, byte>(of.FileName);
                 imageBox1.Image = _imgInput;
             }
+            Mat matInput = _imgInput.Mat;
+            moduleKeyFrameExtraction(matInput);
         }
 
         public Image<Bgr, Byte> resize(Image<Bgr, Byte> im)
@@ -381,54 +353,6 @@ namespace Example
             }
             float[] result = hog.Compute(imageOfInterest, new System.Drawing.Size(16, 16), new System.Drawing.Size(0, 0), p);
             return result;
-        }
-
-        private void skinDetectionToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_imgInput == null)
-            {
-                return;
-            }
-            skinAreaDetection(_imgInput.Bitmap);
-            imageBox1.Image = _imgInput;
-        }
-
-        private void sobelToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (_imgInput == null)
-            {
-                return;
-            }
-
-            //IOutputArray magnitude;
-            // IOutputArray angle;
-            Image<Gray, byte> imageSobelInput = _imgInput.Convert<Gray, byte>();
-            Image<Gray, float> _imgSobelx = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
-            Image<Gray, float> _imgSobely = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
-            _imgSobelx = imageSobelInput.Sobel(1, 0, 3);
-            _imgSobely = imageSobelInput.Sobel(0, 1, 3);
-            Image<Gray, float> magnitude = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
-            Image<Gray, float> angle = new Image<Gray, float>(_imgInput.Width, _imgInput.Height);
-            CvInvoke.CartToPolar(_imgSobelx, _imgSobely, magnitude, angle, true);
-            imageBox1.Image = magnitude;
-
-            Mat mag = magnitude.Mat;
-            //Wrong...............Wrong
-            Image<Bgr, byte> imageHogInput = magnitude.Convert<Bgr, byte>();
-            RangeF a = mag.GetValueRange();
-            label2.Text = "Max: " + a.Max.ToString() + "  Min: " + a.Min.ToString();
-            
-            HOGDescriptor ho = new HOGDescriptor();
-            float[] desc = new float[3780];
-            /*desc = GetVector(imageHogInput);
-            string fra = "";
-            label3.Text = desc.Length.ToString();// desc.GetValue(10).ToString();
-            System.IO.File.WriteAllText(@"des.txt", desc.Length.ToString());*/
-            /*for (int i = 0; i< desc.Length; i++)
-            {
-                fra = "Frame Number: " + i + " Value " + desc.GetValue(i).ToString() + Environment.NewLine;
-                System.IO.File.WriteAllText(@"des.txt", fra);
-            }*/
         }
 
         private  void cameraInputToolStripMenuItem_Click(object sender, EventArgs e)
@@ -491,74 +415,6 @@ namespace Example
             }
         }
 
-        #region extra
-
-
-        /*SVM svm = new SVM();
-        FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
-        svm.Read(fileStorageRead.GetRoot(0));
-        svm.TrainAuto(trainData);
-
-                    FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
-        svm.Write(fileStorageWrite);
-                    Matrix<float> hehe = new Matrix<float>(1, 16);
-                    for (int q = 0; q< 16; q++)
-                    {
-                        hehe[0, q] = masjhdb[11, q];
-                    }
-    float real = svm.Predict(hehe);
-    
-
-
-    fghfh += array[(int)real];
-
-        */
-        /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
-         {
-             throw new NotImplementedException();
-         }*/
-        /* private async void ProcessFrame(object sender, EventArgs e)
-         {
-             try
-             {
-                 while (!Pause)
-                 {
-
-                     Mat m = _capture.QueryFrame();
-                     pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
-                     await Task.Delay(1000);
-
-                 }
-             }
-             catch (Exception ex)
-             {
-                 MessageBox.Show(ex.Message);
-             }
-         }*/
-        /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
-        Mat hier = new Mat();
-        CvInvoke.FindContours(imageSobelInput, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
-        Dictionary<int, double> dict = new Dictionary<int, double>();
-
-        if(countour.Size > 0)
-        {
-            for(int i = 0; i < countour.Size; i++)
-            {
-                double area = CvInvoke.ContourArea(countour[i]);
-                dict.Add(i, area);
-            }
-        }
-
-        var item = dict.OrderByDescending(v => v.Value).Take(2);
-
-        foreach(var it in item)
-        {
-            int key = int.Parse(it.Key.ToString());
-            Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
-           // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
-        }*/
-        #endregion
-
         private void speechToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SpeechSynthesizer reader = new SpeechSynthesizer();
@@ -576,5 +432,196 @@ namespace Example
             }
 
         }
+
+        private void sVMTPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string finalOutput = "";
+            svm.Train(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
+            //svm.Save(@"abc.xml");
+            //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
+            //svm.Write(fileStorageWrite);
+            Matrix<float> testSample = new Matrix<float>(1, 16);
+            for (int q = 0; q < 16; q++)
+            {
+                testSample[0, q] = allFeatureOfSample[36, q];
+            }
+            float real = svm.Predict(testSample);
+
+            finalOutput += labelArray[(int)real];
+            label5.Text = finalOutput.ToString();
+            SpeechSynthesizer reader1 = new SpeechSynthesizer();
+
+
+            if (label5.Text != " ")
+            {
+                reader1.Dispose();
+                reader1 = new SpeechSynthesizer();
+                reader1.SpeakAsync(finalOutput.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+
+            System.IO.File.WriteAllText(@"SVMResult.txt", real.ToString());
+        }
+
+        private void aNNTPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string finalOutput = "";
+            int features = 16;
+            int classes = 26;
+            Matrix<int> layers = new Matrix<int>(6, 1);
+            layers[0, 0] = features;
+            layers[1, 0] = classes * 16;
+            layers[2, 0] = classes * 8;
+            layers[3, 0] = classes * 4;
+            layers[4, 0] = classes * 2;
+            layers[5, 0] = classes; 
+
+            //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
+            //ann.Read(fileStorageRead.GetRoot(0));
+            ann.SetLayerSizes(layers);
+            ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
+            ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
+            ann.Train(allFeatureOfSample, DataLayoutType.RowSample, annAllResponse);
+
+            FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
+            ann.Write(fileStorageWrite);
+
+            Matrix<float> testSample = new Matrix<float>(1, 16);
+            for (int q = 0; q< 16; q++)
+            {
+                testSample[0, q] = allFeatureOfSample[36, q];
+            }
+            float real = ann.Predict(testSample);
+
+            finalOutput += labelArray[(int)real];
+            label5.Text = finalOutput.ToString();
+            SpeechSynthesizer reader1 = new SpeechSynthesizer();
+
+
+            if (label5.Text != " ")
+            {
+                reader1.Dispose();
+                reader1 = new SpeechSynthesizer();
+                reader1.SpeakAsync(finalOutput.ToString());
+            }
+            else
+            {
+                MessageBox.Show("No Text Present!");
+            }
+
+            System.IO.File.WriteAllText(@"ANNResult.txt", real.ToString());
+        }
+
+        #region extra
+
+            /* String filePath = @"test.xml";
+                    StringBuilder sb = new StringBuilder();
+                    (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
+                    XmlDocument xDoc = new XmlDocument();
+                    xDoc.LoadXml(sb.ToString());
+
+                    System.IO.File.WriteAllText(filePath, sb.ToString());
+                    Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
+
+                    string djf = null;
+                    djf = System.IO.File.ReadAllText(@"g.txt");
+                    djf += Environment.NewLine;
+                    djf += Environment.NewLine;
+                    for (int p = 0; p < 16; p++)
+                    {
+                        for (int q = 0; q < 100; q++)
+                        {
+                            djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
+                        }
+                        djf += Environment.NewLine;
+                    }*/
+
+            /*int features = 100;
+                    int classes = 26;
+                    Matrix<int> layers = new Matrix<int>(6, 1);
+                    layers[0, 0] = features;
+                    layers[1, 0] = classes * 16;
+                    layers[2, 0] = classes * 8;
+                    layers[3, 0] = classes * 4;
+                    layers[4, 0] = classes * 2;
+                    layers[5, 0] = classes;*/
+            //ANN_MLP ann = new ANN_MLP();
+
+            //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
+            //ann.Read(fileStorageRead.GetRoot(0));
+            //svm.Read(fileStorageRead.GetRoot(0));
+            //ann.SetLayerSizes(layers);
+            //ann.SetActivationFunction(ANN_MLP.AnnMlpActivationFunction.SigmoidSym, 0, 0);
+            //ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
+            //ann.Train(featureOfSample, DataLayoutType.RowSample, svmResponse);
+
+
+            /*SVM svm = new SVM();
+            FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
+            svm.Read(fileStorageRead.GetRoot(0));
+            svm.TrainAuto(trainData);
+
+                        FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
+            svm.Write(fileStorageWrite);
+                        Matrix<float> testSample = new Matrix<float>(1, 16);
+                        for (int q = 0; q< 16; q++)
+                        {
+                            testSample[0, q] = featureOfSample[11, q];
+                        }
+        float real = svm.Predict(testSample);
+
+
+
+        finalOutput += labelArray[(int)real];
+
+            */
+            /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
+             {
+                 throw new NotImplementedException();
+             }*/
+            /* private async void ProcessFrame(object sender, EventArgs e)
+             {
+                 try
+                 {
+                     while (!Pause)
+                     {
+
+                         Mat m = _capture.QueryFrame();
+                         pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
+                         await Task.Delay(1000);
+
+                     }
+                 }
+                 catch (Exception ex)
+                 {
+                     MessageBox.Show(ex.Message);
+                 }
+             }*/
+            /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
+            Mat hier = new Mat();
+            CvInvoke.FindContours(imageSobelInput, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
+            Dictionary<int, double> dict = new Dictionary<int, double>();
+
+            if(countour.Size > 0)
+            {
+                for(int i = 0; i < countour.Size; i++)
+                {
+                    double area = CvInvoke.ContourArea(countour[i]);
+                    dict.Add(i, area);
+                }
+            }
+
+            var item = dict.OrderByDescending(v => v.Value).Take(2);
+
+            foreach(var it in item)
+            {
+                int key = int.Parse(it.Key.ToString());
+                Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
+               // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
+            }*/
+#endregion
+        }
     }
-}
