@@ -42,7 +42,7 @@ namespace Example
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = true;
-        Matrix<float> response = new Matrix<float>(16, 26) {};
+        Matrix<int> response = new Matrix<int>(16, 1) {};
         
         #endregion
 
@@ -218,13 +218,8 @@ namespace Example
             int high = mid + 8;
             for (int i = 0; i < 16; i++)
             {
-                for (int j = 0; j < 26; j++)
-                {
-                    if (j == indexOfResponse)
-                        response[i, j] = 1;
-                    if (j != indexOfResponse)
-                        response[i, j] = 0;
-                }
+                int j = 0;
+                response[i, j] = indexOfResponse;
             }
             indexOfResponse++;
             if (low < first)
@@ -283,7 +278,7 @@ namespace Example
                 }*/
                 Matrix<float> masjhdb = result.Convert<float>();
                 //TrainData trainData = new TrainData(masjhdb, DataLayoutType.RowSample, response);
-                int features = 100;
+                /*int features = 100;
                 int classes = 26;
                 Matrix<int> layers = new Matrix<int>(6, 1);
                 layers[0, 0] = features;
@@ -291,10 +286,10 @@ namespace Example
                 layers[2, 0] = classes * 8;
                 layers[3, 0] = classes * 4;
                 layers[4, 0] = classes * 2;
-                layers[5, 0] = classes;
+                layers[5, 0] = classes;*/
                 //ANN_MLP ann = new ANN_MLP();
                 SVM svm = new SVM();
-                //FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
+                //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
                 //ann.Read(fileStorageRead.GetRoot(0));
                 //svm.Read(fileStorageRead.GetRoot(0));
                 //ann.SetLayerSizes(layers);
@@ -302,9 +297,9 @@ namespace Example
                 //ann.SetTrainMethod(ANN_MLP.AnnMlpTrainMethod.Backprop, 0, 0);
                 //ann.Train(masjhdb, DataLayoutType.RowSample, response);
                 svm.Train(masjhdb, DataLayoutType.RowSample, response);
-                //ann.Save(@"abc.xml");
-                FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
-                svm.Write(fileStorageWrite);
+                svm.Save(@"abc.xml");
+                //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
+                //svm.Write(fileStorageWrite);
                 Matrix<float> hehe = new Matrix<float>(1, 100);
                 for (int q = 0; q < 100; q++)
                 {
