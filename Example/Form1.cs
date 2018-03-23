@@ -89,6 +89,9 @@ namespace Example
                 {
                     Mat matInput = new Mat();
                     capture.Read(matInput);
+                    Image<Bgr, Byte> reducedImage = matInput.ToImage<Bgr, Byte>();
+                    reducedImage.Resize(256, 128, Inter.Linear);
+                    matInput = reducedImage.Mat;
                     if (!matInput.IsEmpty)
                     {
                         moduleKeyFrameExtraction(matInput);
@@ -188,7 +191,7 @@ namespace Example
             Image<Bgr, Byte> imageMedianBlurForExtraction = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
             CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 7);
             imageBox2.Image = imageMedianBlurForExtraction; //Noise Removing
-            Image<Bgr, Byte> real = resize(imageMedianBlurForExtraction);
+            Image<Bgr, Byte> real = imgResize(imageMedianBlurForExtraction);
             frameName = "gesture\\" + frameNumber + ".jpeg";
             real.Save(frameName);
 
@@ -201,7 +204,7 @@ namespace Example
         private async void moduleFeatureExtraction(int first,int last)
         {
             
-            double[,] RawData = new double[16, 3780];
+            double[,] RawData = new double[16, 12420];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
             int high = mid + 8;
@@ -242,11 +245,11 @@ namespace Example
                 keyFrameNumber++;
                 pictureBox3.Image = featurExtractionInput.Bitmap;
                 await Task.Delay(1000 / Convert.ToInt32(2));
-                float[] desc = new float[3780];
+                float[] desc = new float[12420];
                 desc = GetVector(featurExtractionInput);
 
                 int i = k - (low);
-                for (int j = 0; j < 3780; j++)
+                for (int j = 0; j < 12420; j++)
                 {
                     double val = Convert.ToDouble(desc[j]);
                     RawData.SetValue(val, i, j);
@@ -255,13 +258,12 @@ namespace Example
             if (k == high)
             {
                 Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
-                Matrix<Double> Mean = new Matrix<Double>(1, 3780);
-                Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
-                Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
+                Matrix<Double> Mean = new Matrix<Double>(1, 12420);
+                Matrix<Double> EigenValues = new Matrix<Double>(1, 12420);
+                Matrix<Double> EigenVectors = new Matrix<Double>(12420, 12420);
                 CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 100);
                 Matrix<Double> result = new Matrix<Double>(10, 16);
                 CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
-
                 
                 
                 featureOfSample = result.Convert<float>();
@@ -304,14 +306,14 @@ namespace Example
         private void svmTraining()
         {
             string finalOutput = "";
-            //TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
+            TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
             //svm.SetKernel(Emgu.CV.ML.SVM.SvmKernelType.Linear);
             //svm.Type = Emgu.CV.ML.SVM.SvmType.CSvc;
             //svm.C = 1;
             //svm.TermCriteria = new MCvTermCriteria(100, 0.00001);
             //svm.Train(SvmTrainData);
-            //bool trained = svm.TrainAuto(SvmTrainData, 2);
-            //svm.Save("SVM_Model.xml");
+            bool trained = svm.TrainAuto(SvmTrainData, 2);
+            svm.Save("SVM_Model.xml");
             //FileStorage fileStorageWrite = new FileStorage(@"SVM_Model.xml", FileStorage.Mode.Write);
             //svm.Write(fileStorageWrite);
 
@@ -433,9 +435,9 @@ namespace Example
             moduleKeyFrameExtraction(matInput);
         }
 
-        public Image<Bgr, Byte> resize(Image<Bgr, Byte> im)
+        public Image<Bgr, Byte> imgResize(Image<Bgr, Byte> im)
         {
-            return im.Resize(64, 128, Emgu.CV.CvEnum.Inter.Linear);
+            return im.Resize(192, 128, Inter.Linear);
         }
 
         public float[] GetVector(Image<Bgr, Byte> imageOfInterest)
@@ -528,7 +530,6 @@ namespace Example
             {
                 MessageBox.Show("No Text Present!");
             }
-
         }
 
         private void sVMTPToolStripMenuItem_Click(object sender, EventArgs e)
