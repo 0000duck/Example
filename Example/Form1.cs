@@ -19,14 +19,13 @@ namespace Example
         SVM svm = new SVM();
         ANN_MLP ann = new ANN_MLP();
         int indexOfResponse = 0;
-        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
+        string[] labelArray = new string[] {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "how are", "you", "i am", "fine"};
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
         int first = -1;
         int last = -1;
         VideoCapture capture;
-        VideoCapture captureFeature;
         Boolean Pause = false;
         Boolean captureProcess = false;
         Boolean isFirst = false;
@@ -224,15 +223,40 @@ namespace Example
             int low = mid - 8; ;
             int high = mid + 8;
 
+            for (; low < first;)
+                low++;
+            for (; high > last;)
+                high--;
+            int length = high - low;
+            int k;
+            for (k = (low); k < (high); k++)
+            {
+                string frameName = "gesture//" + k + ".jpeg";
+                Image<Bgr, byte> featureExtractionInput = new Image<Bgr, byte>(frameName);
+                string keyFrameName = "keyframes//" + keyFrameNumber + ".jpeg";
+                featureExtractionInput.Save(keyFrameName);
+                keyFrameNumber++;
+                pictureBox3.Image = featureExtractionInput.Bitmap;
+                await Task.Delay(1000 / Convert.ToInt32(2));
+                float[] desc = new float[8100];
+                desc = GetVector(featureExtractionInput);
+
+                int i = k - (low);
+                for (int j = 0; j < 8100; j++)
+                {
+                    double val = Convert.ToDouble(desc[j]);
+                    RawData.SetValue(val, i, j);
+                }
+            }
+
             //svmResponse generation
-            
             for (int i = 0, j = 0; i < 16; i++)
             {
                 svmResponse[i, j] = indexOfResponse;
             }
 
             //annResponse generation
-            
+            /*
             for (int i = 0; i < 16; i++)
             {
                 for (int j = 0; j < 26; j++)
@@ -243,33 +267,8 @@ namespace Example
                         annResponse[i, j] = 0;
                 }
                 
-            }
+            }*/
 
-            if (low < first)
-                low++;
-            if (high > last)
-                low++;
-            int length = high - low;
-            int k;
-            for (k = (low); k < (high); k++)
-            {
-                string frameName = "gesture//" + k + ".jpeg";
-                Image<Bgr, byte> featurExtractionInput = new Image<Bgr, byte>(frameName);
-                string keyFrameName = "keyframes//" + keyFrameNumber + ".jpeg";
-                featurExtractionInput.Save(keyFrameName);
-                keyFrameNumber++;
-                pictureBox3.Image = featurExtractionInput.Bitmap;
-                await Task.Delay(1000 / Convert.ToInt32(2));
-                float[] desc = new float[8100];
-                desc = GetVector(featurExtractionInput);
-
-                int i = k - (low);
-                for (int j = 0; j < 8100; j++)
-                {
-                    double val = Convert.ToDouble(desc[j]);
-                    RawData.SetValue(val, i, j);
-                }
-            }
             if (k == high)
             {
                 Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
@@ -279,8 +278,7 @@ namespace Example
                 CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 16);
                 Matrix<Double> result = new Matrix<Double>(16, 16);
                 CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
-
-                
+                                
                 
                 featureOfSample = result.Convert<float>();
                 for(int p=0; p<16; p++)
@@ -304,14 +302,14 @@ namespace Example
                         svmTestingData += " Feature:    ";
                     }
 
-                    annData += "Response:   ";
+                    /*annData += "Response:   ";
                     for (int q = 0; q < 26; q++)
                     {
                         annAllResponse[((indexOfResponse *16) + p), q] = annResponse[p, q];
                         annData +=  annResponse[p, q].ToString() + ", ";
                     }
                     annData += " Feature:    ";
-
+                    */
                     
                     for (int q = 0; q < 16; q++)
                     {
@@ -327,23 +325,23 @@ namespace Example
                             svmTestingData += featureOfSample[p, q];
 
                         }
-                        annData += featureOfSample[p, q].ToString() + ",  ";
+                        //annData += featureOfSample[p, q].ToString() + ",  ";
                         svmData += featureOfSample[p, q].ToString() + ",  ";
                     }
-                    annData += Environment.NewLine;
+                    //annData += Environment.NewLine;
                     svmData += Environment.NewLine;
                     svmTrainingData += Environment.NewLine;
                     svmTestingData += Environment.NewLine;
                 }
                 System.IO.File.WriteAllText(@"SVMData.txt", svmData);
-                System.IO.File.WriteAllText(@"ANNData.txt", annData);
+                //System.IO.File.WriteAllText(@"ANNData.txt", annData);
                 System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmTrainingData);
                 System.IO.File.WriteAllText(@"SVMTestingData.txt", svmTestingData);
                 //if (indexOfResponse>0)
-                //{
+                {
                     svmTraining();
-                   //annTraining();
-                //}
+                    //annTraining();
+                }
                 indexOfResponse++;
             }
         }
@@ -366,7 +364,7 @@ namespace Example
             Matrix<float> testSample = new Matrix<float>(1, 16);
             for (int q = 0; q < 16; q++)
             {
-                testSample[0, q] = allFeatureOfSample[(indexOfResponse * 16)+15, q];
+                testSample[0, q] = allFeatureOfSample[(indexOfResponse * 16)+11, q];
             }
             float real = svm.Predict(testSample);
 
