@@ -15,27 +15,36 @@ namespace Example
     public partial class Form1 : Form
     {
         #region declaration
+        VideoWriter VideoW;
         SVM svm = new SVM();
         ANN_MLP ann = new ANN_MLP();
         int indexOfResponse = 0;
-        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
         int first = -1;
         int last = -1;
         VideoCapture capture;
+        VideoCapture captureFeature;
         Boolean Pause = false;
         Boolean captureProcess = false;
         Boolean isFirst = false;
         Boolean isLast = true;
         Matrix<float> featureOfSample = new Matrix<float>(16, 16) { };
         Matrix<float> allFeatureOfSample = new Matrix<float>(416, 16) {};
+        Matrix<float> trainingFeatures = new Matrix<float>(416, 16) { };
+        Matrix<float> testingFeatures = new Matrix<float>(416, 16) { };
+        
         Matrix<int> svmResponse = new Matrix<int>(16, 1) { };
+        Matrix<int> svmTrainingResponse = new Matrix<int>(416, 1) { };
+
         Matrix<int> annResponse = new Matrix<int>(16, 26) { };
         Matrix<int> svmAllResponse = new Matrix<int>(416, 1) {};
         Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
         string svmData = "";
+        string svmTrainingData = "";
+        string svmTestingData = "";
         string annData = "";
         int keyFrameNumber = 0;
 
@@ -83,18 +92,24 @@ namespace Example
             try
             {
                 double frameNumber = capture.GetCaptureProperty(CapProp.FrameCount);
+                float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
-               
+                VideoW = new VideoWriter(@"temp.avi",
+                                    FourCC.H264/*VideoWriter.Fourcc('M','J','P','G')Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
+                                    30,
+                                    new Size(capture.Width, capture.Height),
+                                    true);
                 while (!Pause)
                 {
                     Mat matInput = new Mat();
+                    Mat reduceMatInput = new Mat();
                     capture.Read(matInput);
-                    Image<Bgr, Byte> reducedImage = matInput.ToImage<Bgr, Byte>();
-                    reducedImage.Resize(256, 128, Inter.Linear);
-                    matInput = reducedImage.Mat;
                     if (!matInput.IsEmpty)
                     {
-                        moduleKeyFrameExtraction(matInput);
+                        Image<Bgr, Byte> imageResizeInput = matInput.ToImage<Bgr, Byte>();
+                        Image <Bgr, Byte> imageResizeOutput = resize(imageResizeInput, 300, 200);
+                        reduceMatInput = imageResizeOutput.Mat;
+                        moduleKeyFrameExtraction(reduceMatInput);
                         double fps = capture.GetCaptureProperty(CapProp.Fps);
                         await Task.Delay(1000 / Convert.ToInt32(fps));
                     }
@@ -174,7 +189,7 @@ namespace Example
             var faces = face.DetectMultiScale(grayframe, 1.1, 25, new Size(10, 10));
             foreach (var f in faces)
             {
-                Rectangle faceRectangle = Rectangle.Inflate(f, 40, 40);
+                Rectangle faceRectangle = Rectangle.Inflate(f, 25, 25);
                 imageInput.Draw(faceRectangle, new Bgr(Color.Black), -1);
             }
             Mat faceEliminationMat = imageInput.Mat;
@@ -189,9 +204,9 @@ namespace Example
 
 
             Image<Bgr, Byte> imageMedianBlurForExtraction = new Image<Bgr, Byte>(inputMat.Width, inputMat.Height);
-            CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 7);
+            CvInvoke.MedianBlur(imageInput, imageMedianBlurForExtraction, 5);
             imageBox2.Image = imageMedianBlurForExtraction; //Noise Removing
-            Image<Bgr, Byte> real = imgResize(imageMedianBlurForExtraction);
+            Image<Bgr, Byte> real = resize(imageMedianBlurForExtraction, 128, 128);
             frameName = "gesture\\" + frameNumber + ".jpeg";
             real.Save(frameName);
 
@@ -204,7 +219,7 @@ namespace Example
         private async void moduleFeatureExtraction(int first,int last)
         {
             
-            double[,] RawData = new double[16, 12420];
+            double[,] RawData = new double[16, 8100];
             int mid = (first + last) / 2;
             int low = mid - 8; ;
             int high = mid + 8;
@@ -245,11 +260,11 @@ namespace Example
                 keyFrameNumber++;
                 pictureBox3.Image = featurExtractionInput.Bitmap;
                 await Task.Delay(1000 / Convert.ToInt32(2));
-                float[] desc = new float[12420];
+                float[] desc = new float[8100];
                 desc = GetVector(featurExtractionInput);
 
                 int i = k - (low);
-                for (int j = 0; j < 12420; j++)
+                for (int j = 0; j < 8100; j++)
                 {
                     double val = Convert.ToDouble(desc[j]);
                     RawData.SetValue(val, i, j);
@@ -258,12 +273,13 @@ namespace Example
             if (k == high)
             {
                 Matrix<Double> DataMatrix = new Matrix<Double>(RawData);
-                Matrix<Double> Mean = new Matrix<Double>(1, 12420);
-                Matrix<Double> EigenValues = new Matrix<Double>(1, 12420);
-                Matrix<Double> EigenVectors = new Matrix<Double>(12420, 12420);
-                CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 100);
-                Matrix<Double> result = new Matrix<Double>(10, 16);
+                Matrix<Double> Mean = new Matrix<Double>(1, 8100);
+                Matrix<Double> EigenValues = new Matrix<Double>(1, 8100);
+                Matrix<Double> EigenVectors = new Matrix<Double>(8100, 8100);
+                CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 16);
+                Matrix<Double> result = new Matrix<Double>(16, 16);
                 CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
+
                 
                 
                 featureOfSample = result.Convert<float>();
@@ -273,6 +289,20 @@ namespace Example
                     //annData += "Response:   " + svmResponse[p, 0].ToString() + "   Feature:    ";
                     svmAllResponse[(((indexOfResponse) * 16) + p), 0] = svmResponse[p, 0];
 
+                    
+                    if (p < 14)
+                    {
+                        svmTrainingData += "Response:   ";
+                        svmTrainingResponse[(((indexOfResponse) * 14) + p), 0] = svmResponse[p, 0];
+                        svmTrainingData += svmResponse[p, 0].ToString() ;
+                        svmTrainingData += " Feature:    ";
+                    }
+                    
+
+                    if (p >= 14)
+                    {
+                        svmTestingData += " Feature:    ";
+                    }
 
                     annData += "Response:   ";
                     for (int q = 0; q < 26; q++)
@@ -280,25 +310,40 @@ namespace Example
                         annAllResponse[((indexOfResponse *16) + p), q] = annResponse[p, q];
                         annData +=  annResponse[p, q].ToString() + ", ";
                     }
-                    annData += " Feature:    "; 
+                    annData += " Feature:    ";
 
+                    
                     for (int q = 0; q < 16; q++)
                     {
                         allFeatureOfSample[((indexOfResponse*16) + p), q] = featureOfSample[p, q];
+                        if (p < 14)
+                        {
+                            trainingFeatures[((indexOfResponse * 14) + p), q] = featureOfSample[p, q];
+                            svmTrainingData += featureOfSample[p, q].ToString() + ",  ";
+                        }
+                        if (p >= 14)
+                        {
+                            testingFeatures[((indexOfResponse * 14) + p -(13*(indexOfResponse+1))), q] = featureOfSample[p, q];
+                            svmTestingData += featureOfSample[p, q];
+
+                        }
                         annData += featureOfSample[p, q].ToString() + ",  ";
                         svmData += featureOfSample[p, q].ToString() + ",  ";
                     }
                     annData += Environment.NewLine;
                     svmData += Environment.NewLine;
+                    svmTrainingData += Environment.NewLine;
+                    svmTestingData += Environment.NewLine;
                 }
-                System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmData);
-                System.IO.File.WriteAllText(@"ANNTrainingData.txt", annData);
-                
-                if(indexOfResponse>0)
-                {
+                System.IO.File.WriteAllText(@"SVMData.txt", svmData);
+                System.IO.File.WriteAllText(@"ANNData.txt", annData);
+                System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmTrainingData);
+                System.IO.File.WriteAllText(@"SVMTestingData.txt", svmTestingData);
+                //if (indexOfResponse>0)
+                //{
                     svmTraining();
-                    //annTraining();
-                }
+                   //annTraining();
+                //}
                 indexOfResponse++;
             }
         }
@@ -306,14 +351,10 @@ namespace Example
         private void svmTraining()
         {
             string finalOutput = "";
-            TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
-            //svm.SetKernel(Emgu.CV.ML.SVM.SvmKernelType.Linear);
-            //svm.Type = Emgu.CV.ML.SVM.SvmType.CSvc;
-            //svm.C = 1;
-            //svm.TermCriteria = new MCvTermCriteria(100, 0.00001);
+            //TrainData SvmTrainData = new TrainData(trainingFeatures, DataLayoutType.RowSample, svmTrainingResponse);
             //svm.Train(SvmTrainData);
-            bool trained = svm.TrainAuto(SvmTrainData, 2);
-            svm.Save("SVM_Model.xml");
+            //bool trained = svm.TrainAuto(SvmTrainData, 2);
+            //svm.Save("SVM_Model.xml");
             //FileStorage fileStorageWrite = new FileStorage(@"SVM_Model.xml", FileStorage.Mode.Write);
             //svm.Write(fileStorageWrite);
 
@@ -325,7 +366,7 @@ namespace Example
             Matrix<float> testSample = new Matrix<float>(1, 16);
             for (int q = 0; q < 16; q++)
             {
-                testSample[0, q] = allFeatureOfSample[27, q];
+                testSample[0, q] = allFeatureOfSample[(indexOfResponse * 16)+15, q];
             }
             float real = svm.Predict(testSample);
 
@@ -405,10 +446,12 @@ namespace Example
         private void openVideoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            System.IO.File.WriteAllText(@"SVMTrainingData.txt", " ");
-            System.IO.File.WriteAllText(@"ANNTrainingData.txt", " ");
+            System.IO.File.WriteAllText(@"SVMData.txt", " ");
+            System.IO.File.WriteAllText(@"ANNData.txt", " ");
             System.IO.File.WriteAllText(@"SVMResult.txt", " ");
             System.IO.File.WriteAllText(@"ANNResult.txt", " ");
+            System.IO.File.WriteAllText(@"SVMTestingData.txt", " ");
+            System.IO.File.WriteAllText(@"SVMTrainingData.txt", " ");
             //ofd.filter
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -435,9 +478,9 @@ namespace Example
             moduleKeyFrameExtraction(matInput);
         }
 
-        public Image<Bgr, Byte> imgResize(Image<Bgr, Byte> im)
+        public Image<Bgr, Byte> resize(Image<Bgr, Byte> im, int width, int height)
         {
-            return im.Resize(192, 128, Inter.Linear);
+            return im.Resize(width, height, Emgu.CV.CvEnum.Inter.Linear);
         }
 
         public float[] GetVector(Image<Bgr, Byte> imageOfInterest)
@@ -481,12 +524,18 @@ namespace Example
 
         void ProcessFunction(object sender, EventArgs e)
         {
+            int frameNumber = 2000;
             Mat matInput = capture.QueryFrame();
+            Mat reduceMatInput = new Mat();
             if (!capture.QueryFrame().IsEmpty)
             { 
+                float[] smoothgrad = new float[(int)frameNumber];
                 if (!matInput.IsEmpty)
                 {
-                    moduleKeyFrameExtraction(matInput);
+                    Image<Bgr, Byte> imageResizeInput = matInput.ToImage<Bgr, Byte>();
+                    Image<Bgr, Byte> imageResizeOutput = resize(imageResizeInput, 300, 200);
+                    reduceMatInput = imageResizeOutput.Mat;
+                    moduleKeyFrameExtraction(reduceMatInput);
                 }
             }
         }
@@ -530,6 +579,7 @@ namespace Example
             {
                 MessageBox.Show("No Text Present!");
             }
+
         }
 
         private void sVMTPToolStripMenuItem_Click(object sender, EventArgs e)
