@@ -15,18 +15,16 @@ namespace Example
     public partial class Form1 : Form
     {
         #region declaration
-        VideoWriter VideoW;
         SVM svm = new SVM();
         ANN_MLP ann = new ANN_MLP();
         int indexOfResponse = 0;
-        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'};
+        char[] labelArray = new char[] {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
         string frameName;
         Image<Bgr, byte> _imgInput;
         int frameNumber = 1;
         int first = -1;
         int last = -1;
         VideoCapture capture;
-        VideoCapture captureFeature;
         Boolean Pause = false;
         Boolean captureProcess = false;
         Boolean isFirst = false;
@@ -85,13 +83,8 @@ namespace Example
             try
             {
                 double frameNumber = capture.GetCaptureProperty(CapProp.FrameCount);
-                float[] smoothgrad = new float[(int)frameNumber];
                 label1.Text = "Frame Count is : " + frameNumber.ToString();
-                VideoW = new VideoWriter(@"temp.avi",
-                                    FourCC.H264/*VideoWriter.Fourcc('M','J','P','G')Convert.ToInt32(capture.GetCaptureProperty(CapProp.FourCC))*/,
-                                    30,
-                                    new Size(capture.Width, capture.Height),
-                                    true);
+               
                 while (!Pause)
                 {
                     Mat matInput = new Mat();
@@ -246,6 +239,7 @@ namespace Example
                 Image<Bgr, byte> featurExtractionInput = new Image<Bgr, byte>(frameName);
                 string keyFrameName = "keyframes//" + keyFrameNumber + ".jpeg";
                 featurExtractionInput.Save(keyFrameName);
+                keyFrameNumber++;
                 pictureBox3.Image = featurExtractionInput.Bitmap;
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
@@ -485,11 +479,9 @@ namespace Example
 
         void ProcessFunction(object sender, EventArgs e)
         {
-            int frameNumber = 2000;
             Mat matInput = capture.QueryFrame();
             if (!capture.QueryFrame().IsEmpty)
             { 
-                float[] smoothgrad = new float[(int)frameNumber];
                 if (!matInput.IsEmpty)
                 {
                     moduleKeyFrameExtraction(matInput);
