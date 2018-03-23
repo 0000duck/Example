@@ -39,6 +39,7 @@ namespace Example
         Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
         string svmData = "";
         string annData = "";
+        int keyFrameNumber = 0;
 
         #endregion
 
@@ -243,6 +244,8 @@ namespace Example
             {
                 string frameName = "gesture//" + k + ".jpeg";
                 Image<Bgr, byte> featurExtractionInput = new Image<Bgr, byte>(frameName);
+                string keyFrameName = "keyframes//" + keyFrameNumber + ".jpeg";
+                featurExtractionInput.Save(keyFrameName);
                 pictureBox3.Image = featurExtractionInput.Bitmap;
                 await Task.Delay(1000 / Convert.ToInt32(2));
                 float[] desc = new float[3780];
@@ -262,7 +265,7 @@ namespace Example
                 Matrix<Double> EigenValues = new Matrix<Double>(1, 3780);
                 Matrix<Double> EigenVectors = new Matrix<Double>(3780, 3780);
                 CvInvoke.PCACompute(DataMatrix, Mean, EigenVectors, 100);
-                Matrix<Double> result = new Matrix<Double>(16, 16);
+                Matrix<Double> result = new Matrix<Double>(10, 16);
                 CvInvoke.PCAProject(DataMatrix, Mean, EigenVectors, result);
 
                 
@@ -294,28 +297,39 @@ namespace Example
                 }
                 System.IO.File.WriteAllText(@"SVMTrainingData.txt", svmData);
                 System.IO.File.WriteAllText(@"ANNTrainingData.txt", annData);
+                
+                if(indexOfResponse>0)
+                {
+                    svmTraining();
+                    //annTraining();
+                }
                 indexOfResponse++;
-                svmTraining();
-                annTraining();
             }
         }
 
         private void svmTraining()
         {
             string finalOutput = "";
-            TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
-            svm.SetKernel(Emgu.CV.ML.SVM.SvmKernelType.Linear);
-            svm.Type = Emgu.CV.ML.SVM.SvmType.CSvc;
-            svm.C = 1;
-            svm.TermCriteria = new MCvTermCriteria(100, 0.00001);
-            bool trained = svm.TrainAuto(SvmTrainData, 2);
+            //TrainData SvmTrainData = new TrainData(allFeatureOfSample, DataLayoutType.RowSample, svmAllResponse);
+            //svm.SetKernel(Emgu.CV.ML.SVM.SvmKernelType.Linear);
+            //svm.Type = Emgu.CV.ML.SVM.SvmType.CSvc;
+            //svm.C = 1;
+            //svm.TermCriteria = new MCvTermCriteria(100, 0.00001);
+            //svm.Train(SvmTrainData);
+            //bool trained = svm.TrainAuto(SvmTrainData, 2);
             //svm.Save("SVM_Model.xml");
-            //FileStorage fileStorageWrite = new FileStorage(@"abc.csv", FileStorage.Mode.Write);
+            //FileStorage fileStorageWrite = new FileStorage(@"SVM_Model.xml", FileStorage.Mode.Write);
             //svm.Write(fileStorageWrite);
+
+
+            FileStorage fileStorageWrite = new FileStorage(@"SVM_Model.xml", FileStorage.Mode.Read);
+            svm.Read(fileStorageWrite.GetFirstTopLevelNode());
+
+            
             Matrix<float> testSample = new Matrix<float>(1, 16);
             for (int q = 0; q < 16; q++)
             {
-                testSample[0, q] = allFeatureOfSample[12, q];
+                testSample[0, q] = allFeatureOfSample[27, q];
             }
             float real = svm.Predict(testSample);
 
