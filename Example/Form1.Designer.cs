@@ -61,8 +61,6 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.sVMTPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aNNTPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -79,8 +77,6 @@
             this.openToolStripMenuItem,
             this.playToolStripMenuItem,
             this.pauseToolStripMenuItem,
-            this.sVMTPToolStripMenuItem,
-            this.aNNTPToolStripMenuItem,
             this.speechToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -351,20 +347,6 @@
             this.label4.TabIndex = 18;
             this.label4.Text = "Output";
             // 
-            // sVMTPToolStripMenuItem
-            // 
-            this.sVMTPToolStripMenuItem.Name = "sVMTPToolStripMenuItem";
-            this.sVMTPToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
-            this.sVMTPToolStripMenuItem.Text = "SVM_TP";
-            this.sVMTPToolStripMenuItem.Click += new System.EventHandler(this.sVMTPToolStripMenuItem_Click);
-            // 
-            // aNNTPToolStripMenuItem
-            // 
-            this.aNNTPToolStripMenuItem.Name = "aNNTPToolStripMenuItem";
-            this.aNNTPToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
-            this.aNNTPToolStripMenuItem.Text = "ANN_TP";
-            this.aNNTPToolStripMenuItem.Click += new System.EventHandler(this.aNNTPToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -437,8 +419,6 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ToolStripMenuItem speechToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem sVMTPToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem aNNTPToolStripMenuItem;
     }
 }
 

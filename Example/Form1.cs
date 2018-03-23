@@ -17,7 +17,7 @@ namespace Example
         #region declaration
         VideoWriter VideoW;
         SVM svm = new SVM();
-        ANN_MLP ann = new ANN_MLP();
+        //ANN_MLP ann = new ANN_MLP();
         int indexOfResponse = 0;
         string[] labelArray = new string[] {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "how are", "you", "i am", "fine"};
         string frameName;
@@ -40,11 +40,11 @@ namespace Example
 
         Matrix<int> annResponse = new Matrix<int>(16, 26) { };
         Matrix<int> svmAllResponse = new Matrix<int>(416, 1) {};
-        Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
+       // Matrix<float> annAllResponse = new Matrix<float>(416, 26) { };
         string svmData = "";
         string svmTrainingData = "";
         string svmTestingData = "";
-        string annData = "";
+        //string annData = "";
         int keyFrameNumber = 0;
 
         #endregion
@@ -387,7 +387,7 @@ namespace Example
             System.IO.File.WriteAllText(@"SVMResult.txt", real.ToString());
         }
 
-        private void annTraining()
+        /*private void annTraining()
         {
             string finalOutput = "";
             int features = 16;
@@ -434,7 +434,7 @@ namespace Example
             }
 
             System.IO.File.WriteAllText(@"ANNResult.txt", real.ToString());
-        }
+        }*/
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -587,42 +587,42 @@ namespace Example
 
         private void aNNTPToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            annTraining();
+            //annTraining();
         }
 
         #region extra
 
-            /* String filePath = @"test.xml";
-                    StringBuilder sb = new StringBuilder();
-                    (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
-                    XmlDocument xDoc = new XmlDocument();
-                    xDoc.LoadXml(sb.ToString());
+        /*  String filePath = @"test.xml";
+            StringBuilder sb = new StringBuilder();
+            (new XmlSerializer(typeof(Matrix<double>))).Serialize(new StringWriter(sb), result);
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.LoadXml(sb.ToString());
 
-                    System.IO.File.WriteAllText(filePath, sb.ToString());
-                    Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
+            System.IO.File.WriteAllText(filePath, sb.ToString());
+            Matrix<double> matrix = (Matrix<double>)(new XmlSerializer(typeof(Matrix<double>))).Deserialize(new XmlNodeReader(xDoc));
 
-                    string djf = null;
-                    djf = System.IO.File.ReadAllText(@"g.txt");
-                    djf += Environment.NewLine;
-                    djf += Environment.NewLine;
-                    for (int p = 0; p < 16; p++)
-                    {
-                        for (int q = 0; q < 100; q++)
-                        {
-                            djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
-                        }
-                        djf += Environment.NewLine;
-                    }*/
-
-            /*int features = 100;
-                    int classes = 26;
-                    Matrix<int> layers = new Matrix<int>(6, 1);
-                    layers[0, 0] = features;
-                    layers[1, 0] = classes * 16;
-                    layers[2, 0] = classes * 8;
-                    layers[3, 0] = classes * 4;
-                    layers[4, 0] = classes * 2;
-                    layers[5, 0] = classes;*/
+            string djf = null;
+            djf = System.IO.File.ReadAllText(@"g.txt");
+            djf += Environment.NewLine;
+            djf += Environment.NewLine;
+            for (int p = 0; p < 16; p++)
+            {
+                for (int q = 0; q < 100; q++)
+                {
+                    djf += p + " , " + q + "  " + matrix[p, q].ToString() + "    ";
+                }
+                djf += Environment.NewLine;
+            }
+                
+            int features = 100;
+            int classes = 26;
+            Matrix<int> layers = new Matrix<int>(6, 1);
+            layers[0, 0] = features;
+            layers[1, 0] = classes * 16;
+            layers[2, 0] = classes * 8;
+            layers[3, 0] = classes * 4;
+            layers[4, 0] = classes * 2;
+            layers[5, 0] = classes;
             //ANN_MLP ann = new ANN_MLP();
 
             //FileStorage fileStorageRead = new FileStorage(@"abc.csv", FileStorage.Mode.Read);
@@ -634,48 +634,44 @@ namespace Example
             //ann.Train(featureOfSample, DataLayoutType.RowSample, svmResponse);
 
 
-            /*SVM svm = new SVM();
+            SVM svm = new SVM();
             FileStorage fileStorageRead = new FileStorage(@"abc.xml", FileStorage.Mode.Read);
             svm.Read(fileStorageRead.GetRoot(0));
             svm.TrainAuto(trainData);
 
-                        FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
+            FileStorage fileStorageWrite = new FileStorage(@"abc.xml", FileStorage.Mode.Write);
             svm.Write(fileStorageWrite);
-                        Matrix<float> testSample = new Matrix<float>(1, 16);
-                        for (int q = 0; q< 16; q++)
-                        {
-                            testSample[0, q] = featureOfSample[11, q];
-                        }
-        float real = svm.Predict(testSample);
+            Matrix<float> testSample = new Matrix<float>(1, 16);
+            for (int q = 0; q< 16; q++)
+            {
+                testSample[0, q] = featureOfSample[11, q];
+            }
+            float real = svm.Predict(testSample);
+            finalOutput += labelArray[(int)real];
 
-
-
-        finalOutput += labelArray[(int)real];
-
-            */
-            /* private void Capture1_ImageGrabbed(object sender, EventArgs e)
-             {
-                 throw new NotImplementedException();
-             }*/
-            /* private async void ProcessFrame(object sender, EventArgs e)
-             {
-                 try
-                 {
-                     while (!Pause)
-                     {
-
-                         Mat m = _capture.QueryFrame();
-                         pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
-                         await Task.Delay(1000);
-
-                     }
-                 }
-                 catch (Exception ex)
-                 {
-                     MessageBox.Show(ex.Message);
-                 }
-             }*/
-            /*Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
+            private void Capture1_ImageGrabbed(object sender, EventArgs e)
+            {
+                throw new NotImplementedException();
+            }
+            
+            private async void ProcessFrame(object sender, EventArgs e)
+            {
+                try
+                {
+                    while (!Pause)
+                    {
+                        Mat m = _capture.QueryFrame();
+                        pictureBox1.Image = m.ToImage<Bgr, Byte>().Bitmap;
+                        await Task.Delay(1000);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+             
+            Emgu.CV.Util.VectorOfVectorOfPoint countour = new Emgu.CV.Util.VectorOfVectorOfPoint();
             Mat hier = new Mat();
             CvInvoke.FindContours(imageSobelInput, countour, hier, RetrType.External, ChainApproxMethod.ChainApproxSimple);
             Dictionary<int, double> dict = new Dictionary<int, double>();
@@ -697,6 +693,6 @@ namespace Example
                 Rectangle rect = CvInvoke.BoundingRectangle(countour[key]);
                // CvInvoke.Rectangle(imageSobelInput, rect, new MCvScalar(255, 0, 0));
             }*/
-#endregion
-        }
+        #endregion
     }
+}
